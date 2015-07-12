@@ -1,0 +1,8 @@
+f: FileProvider 'fname.ts'
+p: PidAnalyser
+c: ConsolePrinter
+o: FilePrinter 'log.txt'
+
+f -> p
+p -> c
+p -> o
