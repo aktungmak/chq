@@ -1,6 +1,7 @@
 package main
 
 const (
-	CHAN_BUF_SIZE = 10
-	TS_PKT_SIZE   = 188
+	CHAN_BUF_SIZE   = 10
+	TS_PKT_SIZE     = 188
+	FILE_CHUNK_SIZE = 500 //number of packets to read at a time
 )
