@@ -39,8 +39,12 @@ func main() {
 	pdr.RegisterListener(inp)
 
 	pids := make(map[Pid]int)
+
 	for pkt := range inp {
 		pids[pkt.Header.Pid]++
+		if pkt.AdaptationField.Length > 0 {
+			log.Printf("%v", pkt.AdaptationField.Length)
+		}
 	}
 	log.Printf("%v", pids)
 	// pkt = <-inp
