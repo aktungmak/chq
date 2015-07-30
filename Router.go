@@ -27,9 +27,12 @@ func (r *Router) RegisterNode(name string, newnode Routeable) {
 
 func (r *Router) Connect(src, dst string) error {
 	sn, ok := r.Nodes[src]
+	if !ok {
+		return errors.New("No such node " + src)
+	}
 	dn, ok := r.Nodes[dst]
 	if !ok {
-		return errors.New("No such node !")
+		return errors.New("No such node " + dst)
 	}
 	sn.RegisterListener(dn.GetInputChan())
 	return nil
@@ -37,13 +40,13 @@ func (r *Router) Connect(src, dst string) error {
 
 func (r *Router) Disconnect(src, dst string) error {
 	sn, ok := r.Nodes[src]
+	if !ok {
+		return errors.New("No such node " + src)
+	}
 	dn, ok := r.Nodes[dst]
 	if !ok {
-		return errors.New("No such node !")
+		return errors.New("No such node " + dst)
 	}
 	sn.UnRegisterListener(dn.GetInputChan())
 	return nil
 }
-
-//should there be a disconnect function?
-//there would need to be UnRegisterNode too

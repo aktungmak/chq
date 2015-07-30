@@ -1,8 +1,11 @@
-f: FileProvider 'fname.ts'
-p: PidAnalyser
-c: ConsolePrinter
-o: FilePrinter 'log.txt'
+node f ::= FileProvider 'fname.ts'
+node p ::= PidAnalyser
+node c ::= ConsolePrinter
+node o ::= FilePrinter 'log.txt'
 
-f -> p
-p -> c
-p -> o
+#here is a comment
+# and another
+
+conn f -> p -> d -> e
+conn p -> c
+conn p -> o
