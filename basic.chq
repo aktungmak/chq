@@ -1,7 +1,7 @@
-node f ::= FileProvider 'fname.ts'
-node p ::= PidAnalyser
-node c ::= ConsolePrinter
-node o ::= FilePrinter 'log.txt'
+node f ::= FileInput dump.ts
+node p ::= PidFilter 0
+node c ::= PidDropper 101
+node o ::= CommentPrinter log.txt
 
 #here is a comment
 # and another

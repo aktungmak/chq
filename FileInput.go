@@ -13,7 +13,7 @@ type FileInput struct {
 
 //register with global AvailableNodes map
 func init() {
-	AvailableNodes["NewFileInput"] = NewFileInput
+	AvailableNodes["FileInput"] = NewFileInput
 }
 
 func NewFileInput(fname string) (*FileInput, error) {
@@ -23,13 +23,13 @@ func NewFileInput(fname string) (*FileInput, error) {
 	fh, err := os.Open(fname)
 	Check(err)
 
-	f := &FileInput{}
-	f.file = fh
-	f.input = nil
-	f.outputs = make([]chan<- TsPacket, 0)
+	node := &FileInput{}
+	node.file = fh
+	node.input = nil
+	node.outputs = make([]chan<- TsPacket, 0)
 
-	go f.process()
-	return f, nil
+	go node.process()
+	return node, nil
 }
 
 func (node *FileInput) process() {

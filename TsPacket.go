@@ -7,6 +7,7 @@ type TsPacket struct {
 	Header          *TsPacketHeader
 	AdaptationField *AdaptationField `adaptation_field`
 	Payload         []byte           `data_byte`
+	Comment         string           // can be used for logging, don't use newlines
 }
 
 func NewTsPacket(data []byte) TsPacket {

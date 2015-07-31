@@ -3,6 +3,8 @@ package main
 import (
 	"errors"
 	"fmt"
+	"reflect"
+	"strconv"
 	"strings"
 )
 
@@ -48,12 +50,40 @@ func (r *Router) NodeDecl(toks []string) error {
 		return errors.New("Invalid syntax: missing '::=' operator")
 	}
 
-	// name := toks[1]
-	// type, ok := NodeTypes[toks[3]]
-	// if !ok {
-	// 	return errors.New("Unknown node type " + toks[3])
-	// }
-	// newnode := type(toks[4:])
+	name := toks[1]
+
+	_, ok := AvailableNodes[toks[3]]
+	if !ok {
+		return errors.New("Unknown node type " + toks[3])
+	}
+
+	// extract the constructor function as a relfelct.Value
+	nodectr := reflect.ValueOf(AvailableNodes[toks[3]])
+	nodetype := reflect.TypeOf(AvailableNodes[toks[3]])
+
+	// now work out the types of the arguments
+	args := make([]Value, 0)
+	for i := 0; i < nodetype.NumIn(); i++ {
+
+		switch nodetype.In(i) {
+		case reflect.Bool:
+			val := strconv.ParseBool(toks[3+i])
+		case reflect.Int:
+			val := strconv.ParseInt(toks[3+i])
+		case reflect.Float64:
+			val := strconv.ParseFloat(toks[3+i])
+		case reflect.String:
+			val := toks[3]
+		default:
+			return errors.New("Invalid argument in node declaration: " + "TODO value")
+		}
+		args = append(args, reflect.TypeOf(val))
+	}
+
+	// finally call the constructor to ge the new node value
+	nodectr.Call(args)
+
+	name = name
 	return nil
 }
 
