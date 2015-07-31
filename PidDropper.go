@@ -12,6 +12,11 @@ type PidDropper struct {
 	TsNode
 }
 
+//register with global AvailableNodes map
+func init() {
+	AvailableNodes["PidDropper"] = NewPidDropper
+}
+
 func NewPidDropper(pid Pid) (*PidDropper, error) {
 	node := &PidDropper{}
 	node.Pid = pid

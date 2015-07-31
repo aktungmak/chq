@@ -12,6 +12,11 @@ type PidFilter struct {
 	TsNode
 }
 
+//register with global AvailableNodes map
+func init() {
+	AvailableNodes["PidFilter"] = NewPidFilter
+}
+
 func NewPidFilter(pid Pid) (*PidFilter, error) {
 	node := &PidFilter{}
 	node.Pid = pid

@@ -11,6 +11,11 @@ type FileInput struct {
 	TsNode
 }
 
+//register with global AvailableNodes map
+func init() {
+	AvailableNodes["NewFileInput"] = NewFileInput
+}
+
 func NewFileInput(fname string) (*FileInput, error) {
 	var err error
 

@@ -11,6 +11,11 @@ type NetInput struct {
 	TsNode
 }
 
+//register with global AvailableNodes map
+func init() {
+	AvailableNodes["NetInput"] = NewNetInput
+}
+
 func NewNetInput(address string, port int) (*NetInput, error) {
 	var err error
 	var conn *net.UDPConn

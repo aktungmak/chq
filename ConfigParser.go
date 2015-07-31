@@ -50,9 +50,9 @@ func (r *Router) NodeDecl(toks []string) error {
 
 	// name := toks[1]
 	// type, ok := NodeTypes[toks[3]]
-	if !ok {
-		return errors.New("Unknown node type " + toks[3])
-	}
+	// if !ok {
+	// 	return errors.New("Unknown node type " + toks[3])
+	// }
 	// newnode := type(toks[4:])
 	return nil
 }
@@ -64,18 +64,19 @@ func (r *Router) ConnDecl(toks []string) error {
 		if tok == "->" {
 			if (i-1 < 1) || (i+2 > len(toks)) {
 				return errors.New("Mismatched '->' operator")
-			} else {
-				//check that the names are valid in the router
+				{
+				}
 			}
-		}
-	}
-	// second pass, if we got here everything is ok
-	// so apply the configuration
-	for i, tok := range toks {
-		if tok == "->" {
-			from := toks[i-1]
-			to := toks[i+1]
-			fmt.Printf("connecting %s to %s\n", from, to)
+			// second pass, if we got here everything is ok
+			// so apply the configuration
+			for i, tok := range toks {
+				if tok == "->" {
+					src := toks[i-1]
+					dst := toks[i+1]
+					fmt.Printf("connecting %s to %s\n", src, dst)
+					return r.Connect(src, dst)
+				}
+			}
 		}
 	}
 	return nil
