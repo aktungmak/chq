@@ -20,6 +20,7 @@ func NewFileInput(fname string) (*FileInput, error) {
 	var err error
 
 	// try to open file
+	log.Printf("opening file %s", fname)
 	fh, err := os.Open(fname)
 	Check(err)
 

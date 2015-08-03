@@ -26,14 +26,14 @@ func NewTsPacket(data []byte) TsPacket {
 // Represents the 4-byte transport stream packet header
 // See ISO 13818-1 Table 2-2
 type TsPacketHeader struct {
-	SyncByte byte `sync_byte`
-	Tei      bool `transport_error_indicator`
-	Pusi     bool `payload_unit_start_indicator`
-	Tp       bool `transport_priority`
-	Pid      Pid  `PID`
-	Tsc      byte `transport_scrambling_control`
-	Afc      byte `adaptation_field_control`
-	Cc       byte `continuity_counter`
+	SyncByte byte  `sync_byte`
+	Tei      bool  `transport_error_indicator`
+	Pusi     bool  `payload_unit_start_indicator`
+	Tp       bool  `transport_priority`
+	Pid      int16 `PID`
+	Tsc      byte  `transport_scrambling_control`
+	Afc      byte  `adaptation_field_control`
+	Cc       byte  `continuity_counter`
 }
 
 // Constructor to create a new TS header struct
@@ -44,7 +44,7 @@ func NewTsPacketHeader(data []byte) *TsPacketHeader {
 		Tei:      data[1]&128 != 0,
 		Pusi:     data[1]&64 != 0,
 		Tp:       data[1]&32 != 0,
-		Pid:      ((Pid(data[1]) & 31) << 8) + Pid(data[2]),
+		Pid:      ((int16(data[1]) & 31) << 8) + int16(data[2]),
 		Tsc:      (data[3] & 192) >> 6,
 		Afc:      (data[3] & 48) >> 4,
 		Cc:       data[3] & 15,
@@ -126,6 +126,3 @@ func NewAdaptationField(data []byte) *AdaptationField {
 	}
 	return &af
 }
-
-// alias for 13-bit PID value
-type Pid int16

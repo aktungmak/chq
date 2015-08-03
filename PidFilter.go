@@ -8,7 +8,7 @@ import (
 // all other PIDs will be rejected.
 // compare with PidDropper, which has the opposite behaviour
 type PidFilter struct {
-	Pid Pid
+	Pid int16
 	TsNode
 }
 
@@ -17,7 +17,7 @@ func init() {
 	AvailableNodes["PidFilter"] = NewPidFilter
 }
 
-func NewPidFilter(pid Pid) (*PidFilter, error) {
+func NewPidFilter(pid int16) (*PidFilter, error) {
 	node := &PidFilter{}
 	node.Pid = pid
 	node.input = make(chan TsPacket, CHAN_BUF_SIZE)
@@ -31,6 +31,7 @@ func (node *PidFilter) process() {
 	defer node.closeDown()
 	for pkt := range node.input {
 		if pkt.Header.Pid == node.Pid {
+			pkt.Comment = "DEBUG"
 			for _, output := range node.outputs {
 				output <- pkt
 			}

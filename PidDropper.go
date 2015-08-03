@@ -8,7 +8,7 @@ import (
 // the selected PID will be dropped
 // compare with PidFilter, which has the opposite behaviour
 type PidDropper struct {
-	Pid Pid
+	Pid int16
 	TsNode
 }
 
@@ -17,7 +17,7 @@ func init() {
 	AvailableNodes["PidDropper"] = NewPidDropper
 }
 
-func NewPidDropper(pid Pid) (*PidDropper, error) {
+func NewPidDropper(pid int16) (*PidDropper, error) {
 	node := &PidDropper{}
 	node.Pid = pid
 	node.input = make(chan TsPacket, CHAN_BUF_SIZE)

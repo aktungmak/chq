@@ -24,6 +24,12 @@ func main() {
 	cfgdat, _ := ioutil.ReadFile("basic.chq")
 	rtr.ApplyConfig(string(cfgdat))
 
+	out := make(chan TsPacket)
+
+	n.RegisterListener(out)
+	for _ = range out {
+	}
+
 	// fin, err := NewFileInput(*fname)
 	// pdr, err := NewPidDropper(17)
 	// pdq, err := NewPidDropper(0)

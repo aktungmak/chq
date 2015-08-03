@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 	"net"
 )
@@ -42,6 +43,10 @@ func NewNetInput(address string, port int) (*NetInput, error) {
 
 	go n.process()
 	return n, nil
+}
+
+func (node *NetInput) ToJson() ([]byte, error) {
+	return json.Marshal(node)
 }
 
 func (node *NetInput) process() {

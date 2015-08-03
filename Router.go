@@ -8,6 +8,7 @@ type Routeable interface {
 	RegisterListener(chan<- TsPacket)
 	UnRegisterListener(chan<- TsPacket)
 	GetInputChan() chan TsPacket
+	// ToJson() []byte
 }
 
 type Router struct {
@@ -21,8 +22,14 @@ func NewRouter() *Router {
 	}
 }
 
-func (r *Router) RegisterNode(name string, newnode Routeable) {
-	r.Nodes[name] = newnode
+func (r *Router) RegisterNode(name string, newnode Routeable) error {
+	_, present := r.Nodes[name]
+	if present {
+		return errors.New("Node already exists: " + name)
+	} else {
+		r.Nodes[name] = newnode
+		return nil
+	}
 }
 
 func (r *Router) Connect(src, dst string) error {

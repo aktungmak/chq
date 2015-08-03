@@ -20,8 +20,10 @@ func init() {
 
 func NewCommentWriter(fname string) (*CommentWriter, error) {
 	// try to open file
-	fh, err := os.Open(fname)
-	Check(err)
+	fh, err := os.OpenFile(fname, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
+	if err != nil {
+		return nil, err
+	}
 
 	node := &CommentWriter{}
 	node.file = fh

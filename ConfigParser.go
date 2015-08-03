@@ -61,30 +61,56 @@ func (r *Router) NodeDecl(toks []string) error {
 	nodectr := reflect.ValueOf(AvailableNodes[toks[3]])
 	nodetype := reflect.TypeOf(AvailableNodes[toks[3]])
 
-	// now work out the types of the arguments
-	args := make([]Value, 0)
-	for i := 0; i < nodetype.NumIn(); i++ {
+	// make sure the arity of the constructor matches
+	// the number of args provided
+	if nodetype.NumIn() != len(toks)-4 {
+		return errors.New("Incorrect number of args provided!")
+	}
 
-		switch nodetype.In(i) {
+	// now work out the types of the arguments
+	var err error
+	var val interface{}
+	var node Routeable
+	args := make([]reflect.Value, 0)
+	for i := 0; i < nodetype.NumIn(); i++ {
+		switch nodetype.In(i).Kind() {
 		case reflect.Bool:
-			val := strconv.ParseBool(toks[3+i])
+			val, err = strconv.ParseBool(toks[4+i])
+		case reflect.Int16:
+			val, err = strconv.ParseInt(toks[4+i], 10, 16)
+			val = int16(val.(int64))
 		case reflect.Int:
-			val := strconv.ParseInt(toks[3+i])
+			val, err = strconv.ParseInt(toks[4+i], 10, 32)
+			val = int(val.(int64))
+		case reflect.Int64:
+			val, err = strconv.ParseInt(toks[4+i], 10, 64)
 		case reflect.Float64:
-			val := strconv.ParseFloat(toks[3+i])
+			val, err = strconv.ParseFloat(toks[4+i], 64)
 		case reflect.String:
-			val := toks[3]
+			val = toks[4+i]
+			err = nil
 		default:
 			return errors.New("Invalid argument in node declaration: " + "TODO value")
 		}
-		args = append(args, reflect.TypeOf(val))
+		if err != nil {
+			return err
+		} else {
+			args = append(args, reflect.ValueOf(val))
+		}
 	}
 
-	// finally call the constructor to ge the new node value
-	nodectr.Call(args)
+	// finally call the constructor to get the new node value
+	res := nodectr.Call(args)
+	node = res[0].Interface().(Routeable)
 
-	name = name
-	return nil
+	if res[1].Interface() != nil {
+		return res[1].Interface().(error)
+	} else {
+		// if all was ok, register it with the router
+		return r.RegisterNode(name, node)
+	}
+
+	return err
 }
 
 // syntax is conn <name> -> <name> [-> <name> ...]
@@ -104,6 +130,7 @@ func (r *Router) ConnDecl(toks []string) error {
 					src := toks[i-1]
 					dst := toks[i+1]
 					fmt.Printf("connecting %s to %s\n", src, dst)
+					// TODO this only connects the first pair and then just bails out!
 					return r.Connect(src, dst)
 				}
 			}
