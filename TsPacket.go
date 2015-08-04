@@ -1,9 +1,5 @@
 package main
 
-import (
-	"fmt"
-)
-
 // maybe the TsPacket should be changed to a generic packet
 // which has a TYPE field and several fields, one for TS,
 // one for PES etc.
@@ -125,8 +121,6 @@ func NewAdaptationField(data []byte) *AdaptationField {
 
 		af.Pcre = int64(data[ofs+4]&1) << 9
 		af.Pcre += int64(data[ofs+5])
-		fmt.Printf("Pcrb: %v\n", af.Pcrb)
-		fmt.Printf("Pcre: %v\n", af.Pcre)
 		ofs += 6
 	}
 	if af.Opcrf {

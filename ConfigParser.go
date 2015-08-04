@@ -123,18 +123,22 @@ func (r *Router) ConnDecl(toks []string) error {
 				{
 				}
 			}
-			// second pass, if we got here everything is ok
-			// so apply the configuration
-			for i, tok := range toks {
-				if tok == "->" {
-					src := toks[i-1]
-					dst := toks[i+1]
-					fmt.Printf("connecting %s to %s\n", src, dst)
-					// TODO this only connects the first pair and then just bails out!
-					return r.Connect(src, dst)
-				}
+		}
+	}
+	// second pass, if we got here everything is ok
+	// so apply the configuration
+	for i, tok := range toks {
+		if tok == "->" {
+			fmt.Printf("%d, %s", i, tok)
+			src := toks[i-1]
+			dst := toks[i+1]
+			fmt.Printf("connecting %s to %s\n", src, dst)
+			err := r.Connect(src, dst)
+			if err != nil {
+				return err
 			}
 		}
 	}
+
 	return nil
 }

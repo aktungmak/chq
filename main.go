@@ -26,10 +26,13 @@ func main() {
 
 	out := make(chan TsPacket)
 
-	n := rtr.Nodes["f"]
+	n := rtr.Nodes["o"]
 	n.RegisterListener(out)
+	i := 0
 	for _ = range out {
+		i++
 	}
+	log.Printf("Processed %d packets", i)
 
 	// fin, err := NewFileInput(*fname)
 	// pdr, err := NewPidDropper(17)
