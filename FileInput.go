@@ -53,8 +53,9 @@ func (node *FileInput) process() {
 				node.file.Seek(-int64(n-i-1), 1)
 				break
 			}
+			pkt := NewTsPacket(buf[i : i+TS_PKT_SIZE])
 			for _, output := range node.outputs {
-				output <- NewTsPacket(buf[i : i+TS_PKT_SIZE])
+				output <- pkt
 			}
 		}
 	}

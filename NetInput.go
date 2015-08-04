@@ -78,12 +78,9 @@ func (node *NetInput) process() {
 		log.Printf("packetsize is %d bytes", packetsize)
 		// split into TS packets
 		for i := m; i < n; i += packetsize {
+			pkt := NewTsPacket(packet[i : i+packetsize])
 			for _, output := range node.outputs {
-				pkt := NewTsPacket(packet[i : i+packetsize])
-				log.Printf("sending %v", pkt)
 				output <- pkt
-				log.Printf("sent.")
-
 			}
 		}
 	}

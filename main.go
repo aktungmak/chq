@@ -26,6 +26,7 @@ func main() {
 
 	out := make(chan TsPacket)
 
+	n := rtr.Nodes["f"]
 	n.RegisterListener(out)
 	for _ = range out {
 	}

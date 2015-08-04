@@ -31,7 +31,6 @@ func (node *PidFilter) process() {
 	defer node.closeDown()
 	for pkt := range node.input {
 		if pkt.Header.Pid == node.Pid {
-			pkt.Comment = "DEBUG"
 			for _, output := range node.outputs {
 				output <- pkt
 			}

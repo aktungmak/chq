@@ -1,5 +1,9 @@
 package main
 
+import (
+	"fmt"
+)
+
 // maybe the TsPacket should be changed to a generic packet
 // which has a TYPE field and several fields, one for TS,
 // one for PES etc.
@@ -20,7 +24,6 @@ func NewTsPacket(data []byte) TsPacket {
 		AdaptationField: af,
 		// Payload:         payld,
 	}
-
 }
 
 // Represents the 4-byte transport stream packet header
@@ -94,9 +97,9 @@ type AdaptationField struct {
 // returns zero struct if no af (Length = 0).
 func NewAdaptationField(data []byte) *AdaptationField {
 	af := AdaptationField{}
-	if (data[4] & 32) == 0 {
+	if (data[3] & 32) == 0 {
 		//no af
-		return &af
+		return nil
 	}
 	// log.Printf("%v", data)
 	af.Length = data[4]
@@ -109,19 +112,52 @@ func NewAdaptationField(data []byte) *AdaptationField {
 	af.Tpdf = data[5]&2 != 0
 	af.Afef = data[5]&1 != 0
 
-	if af.Pcrf {
+	//keep track of byte offset depending on flags
+	ofs := 6
 
+	if af.Pcrf {
+		af.Pcrb = 0
+		af.Pcrb += int64(data[ofs]) << 25
+		af.Pcrb += int64(data[ofs+1]) << 17
+		af.Pcrb += int64(data[ofs+2]) << 9
+		af.Pcrb += int64(data[ofs+3]) << 1
+		af.Pcrb += int64(data[ofs+4] >> 7)
+
+		af.Pcre = int64(data[ofs+4]&1) << 9
+		af.Pcre += int64(data[ofs+5])
+		fmt.Printf("Pcrb: %v\n", af.Pcrb)
+		fmt.Printf("Pcre: %v\n", af.Pcre)
+		ofs += 6
 	}
 	if af.Opcrf {
+		af.Opcrb = 0
+		af.Opcrb += int64(data[ofs]) << 25
+		af.Opcrb += int64(data[ofs+1]) << 17
+		af.Opcrb += int64(data[ofs+2]) << 9
+		af.Opcrb += int64(data[ofs+3]) << 1
+		af.Opcrb += int64(data[ofs+4] >> 7)
 
+		af.Opcre = int64(data[ofs+4]&1) << 9
+		af.Opcre += int64(data[ofs+5])
+		ofs += 6
 	}
 	if af.Spf {
-
+		af.Sc = data[ofs]
+		ofs += 1
 	}
 	if af.Tpdf {
-
+		af.Tpdl = data[ofs]
+		af.Tpd = data[ofs+1 : ofs+int(af.Tpdl)+1]
+		ofs += int(af.Tpdl + 1)
 	}
 	if af.Afef {
+		af.Afel = data[ofs]
+		ofs += 1
+
+		af.Ltwf = data[ofs]&128 != 0
+		af.Pwrf = data[ofs]&64 != 0
+		af.Ssf = data[ofs]&32 != 0
+		ofs += 1
 
 	}
 	return &af

@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-// A CommentWriter will write the comment fields
+// A CommentWriter will append the comment fields
 // of all TS packets it receives to a file.
 // It passes through TS packets unmodified.
 type CommentWriter struct {
@@ -37,7 +37,9 @@ func NewCommentWriter(fname string) (*CommentWriter, error) {
 func (node *CommentWriter) process() {
 	defer node.closeDown()
 	for pkt := range node.input {
-		node.file.WriteString(pkt.Comment + "\n")
+		if pkt.Comment != "" {
+			node.file.WriteString(pkt.Comment + "\n")
+		}
 		for _, output := range node.outputs {
 			output <- pkt
 		}
