@@ -4,6 +4,10 @@ import (
 	"encoding/json"
 )
 
+// TsNode is the core of every node. It provides the
+// inputs and outputs used by every type of node, and
+// defines the methods specified by Routeable. It is
+// must be embedded in any new Node struct.
 type TsNode struct {
 	input   chan TsPacket
 	outputs []chan<- TsPacket
