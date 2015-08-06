@@ -109,8 +109,6 @@ func (r *Router) NodeDecl(toks []string) error {
 		// if all was ok, register it with the router
 		return r.RegisterNode(name, node)
 	}
-
-	return err
 }
 
 // syntax is conn <name> -> <name> [-> <name> ...]
@@ -120,8 +118,6 @@ func (r *Router) ConnDecl(toks []string) error {
 		if tok == "->" {
 			if (i-1 < 1) || (i+2 > len(toks)) {
 				return errors.New("Mismatched '->' operator")
-				{
-				}
 			}
 		}
 	}
@@ -139,6 +135,5 @@ func (r *Router) ConnDecl(toks []string) error {
 			}
 		}
 	}
-
 	return nil
 }
