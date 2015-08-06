@@ -33,7 +33,11 @@ func main() {
 		i++
 	}
 	log.Printf("Processed %d packets", i)
+	for nn, np := range rtr.Nodes {
+		j, err := np.ToJson()
+		log.Printf("node: %s\n json: %s\n err: %\n", nn, j, err)
 
+	}
 	// fin, err := NewFileInput(*fname)
 	// pdr, err := NewPidDropper(17)
 	// pdq, err := NewPidDropper(0)

@@ -1,11 +1,14 @@
-node f ::= FileInput dump.ts
-node p ::= PidFilter 0
-node c ::= PidDropper 101
-node o ::= CommentPrinter log.txt
+# node p ::= PidFilter 257
+# node c ::= PidDropper 101
 
-#here is a comment
-# and another
+node f ::= FileInput 9XMRX95001.ts
+node cc ::= CcCommenter
+node o ::= CommentWriter log.txt
 
-conn f -> p -> d -> e
-conn p -> c
-conn p -> o
+
+conn f -> cc -> o
+
+#conn f -> p -> c -> o
+#conn f -> p
+#conn p -> c
+#conn c -> o

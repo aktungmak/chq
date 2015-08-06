@@ -8,7 +8,7 @@ type Routeable interface {
 	RegisterListener(chan<- TsPacket)
 	UnRegisterListener(chan<- TsPacket)
 	GetInputChan() chan TsPacket
-	// ToJson() []byte TODO add this method
+	ToJson() ([]byte, error)
 }
 
 type Router struct {

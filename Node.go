@@ -7,8 +7,8 @@ import (
 type TsNode struct {
 	input   chan TsPacket
 	outputs []chan<- TsPacket
-	pktsIn  int64 //counters
-	pktsOut int64
+	PktsIn  int64 //counters
+	PktsOut int64
 }
 
 // accessor to get this node's input channel

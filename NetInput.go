@@ -79,9 +79,9 @@ func (node *NetInput) process() {
 		// split into TS packets
 		for i := m; i < n; i += packetsize {
 			pkt := NewTsPacket(packet[i : i+packetsize])
-			node.pktsIn++
+			node.PktsIn++
 			for _, output := range node.outputs {
-				node.pktsOut++
+				node.PktsOut++
 				output <- pkt
 			}
 		}

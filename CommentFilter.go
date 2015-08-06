@@ -30,10 +30,10 @@ func NewCommentFilter(fname string) (*CommentFilter, error) {
 func (node *CommentFilter) process() {
 	defer node.closeDown()
 	for pkt := range node.input {
-		node.pktsIn++
+		node.PktsIn++
 		if len(pkt.Comment) > 0 {
 			for _, output := range node.outputs {
-				node.pktsOut++
+				node.PktsOut++
 				output <- pkt
 			}
 		}
