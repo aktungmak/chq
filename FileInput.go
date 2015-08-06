@@ -54,7 +54,9 @@ func (node *FileInput) process() {
 				break
 			}
 			pkt := NewTsPacket(buf[i : i+TS_PKT_SIZE])
+			node.pktsIn++
 			for _, output := range node.outputs {
+				node.pktsOut++
 				output <- pkt
 			}
 		}
