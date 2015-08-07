@@ -125,7 +125,6 @@ func (r *Router) ConnDecl(toks []string) error {
 	// so apply the configuration
 	for i, tok := range toks {
 		if tok == "->" {
-			fmt.Printf("%d, %s", i, tok)
 			src := toks[i-1]
 			dst := toks[i+1]
 			fmt.Printf("connecting %s to %s\n", src, dst)

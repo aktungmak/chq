@@ -1,5 +1,7 @@
 package main
 
+// Represents a MPEG TS Program Association Table
+// see ISO 13818-1 section 2.4.4.3
 type Pat struct {
 	Tid  byte `mpeg:"table_id"`
 	Ssi  bool `mpeg:"section_syntax_indicator"`
@@ -30,6 +32,7 @@ func NewPat(data []byte) (*Pat, error) {
 	pat.Sn = data[6]
 	pat.Lsn = data[7]
 	pat.Pgms = make([]pgm, 0)
+	// TODO for loop should terminate on pat.Sl
 	for i := 8; i < len(data); i += 4 {
 		pn := (int(data[i]) << 8) + int(data[i+1])
 		pid := ((int16(data[i+2]) & 31) << 8) + int16(data[i+3])

@@ -1,12 +1,12 @@
-# node p ::= PidFilter 257
 # node c ::= PidDropper 101
+# node cc ::= CcCommenter
+# node o ::= CommentWriter log.txt
 
 node f ::= FileInput 9XMRX95001.ts
-node cc ::= CcCommenter
-node o ::= CommentWriter log.txt
+node p ::= PidFilter 0
+node t ::= PatParser 0
 
-
-conn f -> cc -> o
+conn f -> p -> t
 
 #conn f -> p -> c -> o
 #conn f -> p

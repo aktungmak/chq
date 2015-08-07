@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"io/ioutil"
 	"log"
@@ -27,21 +26,11 @@ func main() {
 
 	out := make(chan TsPacket)
 
-	n := rtr.Nodes["o"]
+	n := rtr.Nodes["t"]
 	n.RegisterListener(out)
-	i := 0
-	for j := 0; j < 86; j++ {
-		i++
-		<-out
-	}
-
-	j, _ := json.MarshalIndent(<-out, "", "  ")
-	log.Print(string(j))
 
 	for _ = range out {
-		i++
 	}
-	log.Printf("Processed %d packets", i)
 	for nn, np := range rtr.Nodes {
 		j, err := np.ToJson()
 		log.Printf("node: %s\n json: %s\n err: %v\n", nn, j, err)

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 )
 
@@ -36,21 +37,52 @@ func (node *PatParser) process() {
 	secLen := 0
 	for pkt := range node.input {
 		if pkt.Header.Pid == 0 {
-			if (secLen + len(pkt.Payload)) > len(secBuf) {
-				log.Print("PAT has overflowed the section buffer!")
-				secLen = 0
-			} else {
-				copy(secBuf[secLen], pkt.Payload)
-			}
 
 			if pkt.Header.Pusi {
-				if secLen > 0 {
-					// this completes the previous section
-					node.CurPat = NewPat(data[:secLen])
+				ptr := int(pkt.Payload[0])
+				if ptr > 0 {
+					log.Printf("%v", pkt.Payload)
+				}
+				// if overflow, give up
+				if secLen+ptr > len(secBuf) {
+					log.Print("PAT has overflowed the section buffer!")
+					secLen = 0
+					// otherwise, if we already have data, get the last and parse
+				} else if secLen > 0 {
+					// copy first half to buffer
+					copy(secBuf[secLen:], pkt.Payload[1:ptr+1])
+					// inc secLen
+					secLen += ptr
+					// parse buffer
+					np, err := NewPat(secBuf[:secLen])
+					if err != nil {
+						log.Printf("Error parsing PAT: %s", err)
+					} else {
+						node.CurPat = np
+					}
+				}
+				// clear buffer
+				secLen = 0
+
+				// starting a new PAT here with the rest of the data
+				copy(secBuf[secLen:], pkt.Payload[ptr:])
+				// copy(secBuf[secLen:], pkt.Payload[ptr+1:])
+
+			} else {
+				// this is just PAT payload
+				// check for overflow
+				if secLen+len(pkt.Payload) > len(secBuf) {
+					log.Print("PAT has overflowed the section buffer!")
+					secLen = 0
+				} else {
+					// all is ok, so push it into the buffer
+					copy(secBuf[secLen:], pkt.Payload)
+					secLen += len(pkt.Payload)
 				}
 			}
-			//
+
 		}
+
 		for _, output := range node.outputs {
 			output <- pkt
 		}
@@ -62,4 +94,8 @@ func (node *PatParser) closeDown() {
 	for _, output := range node.outputs {
 		close(output)
 	}
+}
+
+func (node *PatParser) ToJson() ([]byte, error) {
+	return json.Marshal(node)
 }
