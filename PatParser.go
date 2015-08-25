@@ -38,53 +38,40 @@ func (node *PatParser) process() {
 	for pkt := range node.input {
 		if pkt.Header.Pid == 0 {
 
+			//if pusi
 			if pkt.Header.Pusi {
 				ptr := int(pkt.Payload[0])
-				if ptr > 0 {
-					log.Printf("%v", pkt.Payload)
+				if secLen == 0 {
+					// push data from the ptr onwards into the buffer
+					copy(secBuf[secLen:], pkt.Payload[ptr+1:])
+					secLen += len(pkt.Payload) - ptr - 1
+				} else { //(buf > 0)
+
+					//        push data up until the ptr
+					//        increment bufLen
+					//        parse buffer
+					//
+					//        set bufLen to 0
+					//        push data after the ptr
+					//
 				}
-				// if overflow, give up
-				if secLen+ptr > len(secBuf) {
-					log.Print("PAT has overflowed the section buffer!")
-					secLen = 0
-					// otherwise, if we already have data, get the last and parse
-				} else if secLen > 0 {
-					// copy first half to buffer
-					copy(secBuf[secLen:], pkt.Payload[1:ptr+1])
-					// inc secLen
-					secLen += ptr
-					// parse buffer
-					np, err := NewPat(secBuf[:secLen])
-					if err != nil {
-						log.Printf("Error parsing PAT: %s", err)
+			} else { //no pusi
+				if secLen > 0 {
+					if secLen+len(pkt.Payload) > 4096 {
+						log.Print("PAT has overflowed the section buffer!")
+						secLen = 0
+						continue
 					} else {
-						node.CurPat = np
+						//        push data into buffer
+						//        increment bufLen
 					}
 				}
-				// clear buffer
-				secLen = 0
 
-				// starting a new PAT here with the rest of the data
-				copy(secBuf[secLen:], pkt.Payload[ptr:])
-				// copy(secBuf[secLen:], pkt.Payload[ptr+1:])
-
-			} else {
-				// this is just PAT payload
-				// check for overflow
-				if secLen+len(pkt.Payload) > len(secBuf) {
-					log.Print("PAT has overflowed the section buffer!")
-					secLen = 0
-				} else {
-					// all is ok, so push it into the buffer
-					copy(secBuf[secLen:], pkt.Payload)
-					secLen += len(pkt.Payload)
-				}
 			}
 
-		}
-
-		for _, output := range node.outputs {
-			output <- pkt
+			for _, output := range node.outputs {
+				output <- pkt
+			}
 		}
 	}
 }

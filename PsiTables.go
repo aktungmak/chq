@@ -1,5 +1,10 @@
 package main
 
+import (
+	"errors"
+	"fmt"
+)
+
 // Represents a MPEG TS Program Association Table
 // see ISO 13818-1 section 2.4.4.3
 type Pat struct {
@@ -12,7 +17,7 @@ type Pat struct {
 	Sn   byte `mpeg:"section_number"`
 	Lsn  byte `mpeg:"last_section_number"`
 	Pgms []pgm
-	Crc  int32 `mpeg:"CRC_32"`
+	Crc  uint32 `mpeg:"CRC_32"`
 }
 
 type pgm struct {
@@ -22,7 +27,9 @@ type pgm struct {
 
 func NewPat(data []byte) (*Pat, error) {
 	pat := &Pat{}
-	// TODO init pat
+	if len(data) < 8 {
+		return pat, errors.New("PAT data too short!")
+	}
 	pat.Tid = data[0]
 	pat.Ssi = data[1]&128 != 0
 	pat.Sl = (int(data[1]&15) << 8) + int(data[2])
@@ -31,12 +38,23 @@ func NewPat(data []byte) (*Pat, error) {
 	pat.Cni = data[5]&1 != 0
 	pat.Sn = data[6]
 	pat.Lsn = data[7]
+
+	if len(data) < pat.Sl+3 {
+		return pat, errors.New("PAT data length and section_length field mismatch!")
+	}
+
 	pat.Pgms = make([]pgm, 0)
-	// TODO for loop should terminate on pat.Sl
-	for i := 8; i < len(data); i += 4 {
+	i := 8
+	for ; i < pat.Sl-4; i += 4 {
 		pn := (int(data[i]) << 8) + int(data[i+1])
 		pid := ((int16(data[i+2]) & 31) << 8) + int16(data[i+3])
 		pat.Pgms = append(pat.Pgms, pgm{pn, pid})
+	}
+
+	pat.Crc = uint32(data[i+3]) + uint32(data[i+2])<<8 + uint32(data[i+1])<<16 + uint32(data[i])<<24
+
+	if crc := CalculateCrc32(data[:i]); crc != pat.Crc {
+		return pat, errors.New(fmt.Sprintf("CRC error! Calculated %x but PAT says %x", crc, pat.Crc))
 	}
 
 	return pat, nil
