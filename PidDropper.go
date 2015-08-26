@@ -14,7 +14,7 @@ type PidDropper struct {
 
 //register with global AvailableNodes map
 func init() {
-	AvailableNodes["PidDropper"] = NewPidDropper
+	AvailableNodes.Register("PidDropper", NewPidDropper)
 }
 
 func NewPidDropper(pid int16) (*PidDropper, error) {

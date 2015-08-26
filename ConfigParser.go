@@ -127,11 +127,11 @@ func (r *Router) ConnDecl(toks []string) error {
 		if tok == "->" {
 			src := toks[i-1]
 			dst := toks[i+1]
-			fmt.Printf("connecting %s to %s\n", src, dst)
 			err := r.Connect(src, dst)
 			if err != nil {
 				return err
 			}
+			fmt.Printf("connected %s to %s\n", src, dst)
 		}
 	}
 	return nil

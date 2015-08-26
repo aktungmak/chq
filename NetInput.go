@@ -14,7 +14,7 @@ type NetInput struct {
 
 //register with global AvailableNodes map
 func init() {
-	AvailableNodes["NetInput"] = NewNetInput
+	AvailableNodes.Register("NetInput", NewNetInput)
 }
 
 func NewNetInput(address string, port int) (*NetInput, error) {

@@ -1,5 +1,9 @@
 package main
 
+import (
+	"log"
+)
+
 const (
 	CHAN_BUF_SIZE   = 10
 	TS_PKT_SIZE     = 188
@@ -7,7 +11,17 @@ const (
 	PAT_PID         = 0
 )
 
+type AvailableNodeMap map[string]interface{}
+
+// TODO convert all nodes to use this method
+func (a AvailableNodeMap) Register(name string, node interface{}) {
+	_, exist := a[name]
+	if exist {
+		log.Fatalf("Node '%s' already registered!", name)
+	} else {
+		a[name] = node
+	}
+}
+
 // all nodes should register here so they can be looked up
-// TODO make this a type and give it a Register() method to
-// prevent Node types from hiding each other.
-var AvailableNodes = make(map[string]interface{})
+var AvailableNodes = make(AvailableNodeMap)

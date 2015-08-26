@@ -18,7 +18,7 @@ type PatParser struct {
 
 //register with global AvailableNodes map
 func init() {
-	AvailableNodes["PatParser"] = NewPatParser
+	AvailableNodes.Register("PatParser", NewPatParser)
 }
 
 func NewPatParser(pid int16) (*PatParser, error) {
@@ -36,6 +36,7 @@ func (node *PatParser) process() {
 	secBuf := make([]byte, 4096)
 	secLen := 0
 	for pkt := range node.input {
+		node.PktsIn++
 		if pkt.Header.Pid == 0 {
 
 			//if pusi
@@ -70,6 +71,7 @@ func (node *PatParser) process() {
 			}
 
 			for _, output := range node.outputs {
+				node.PktsOut++
 				output <- pkt
 			}
 		}

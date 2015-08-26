@@ -14,7 +14,8 @@ type PidFilter struct {
 
 //register with global AvailableNodes map
 func init() {
-	AvailableNodes["PidFilter"] = NewPidFilter
+	AvailableNodes.Register("PidFilter", NewPidFilter)
+
 }
 
 func NewPidFilter(pid int16) (*PidFilter, error) {

@@ -13,7 +13,8 @@ type CommentFilter struct {
 
 //register with global AvailableNodes map
 func init() {
-	AvailableNodes["CommentFilter"] = NewCommentFilter
+	AvailableNodes.Register("CommentFilter", NewCommentFilter)
+
 }
 
 func NewCommentFilter(fname string) (*CommentFilter, error) {

@@ -15,7 +15,7 @@ type CommentWriter struct {
 
 //register with global AvailableNodes map
 func init() {
-	AvailableNodes["CommentWriter"] = NewCommentWriter
+	AvailableNodes.Register("CommentWriter", NewCommentWriter)
 }
 
 func NewCommentWriter(fname string) (*CommentWriter, error) {

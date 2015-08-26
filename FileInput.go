@@ -13,7 +13,7 @@ type FileInput struct {
 
 //register with global AvailableNodes map
 func init() {
-	AvailableNodes["FileInput"] = NewFileInput
+	AvailableNodes.Register("FileInput", NewFileInput)
 }
 
 func NewFileInput(fname string) (*FileInput, error) {

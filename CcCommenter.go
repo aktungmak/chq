@@ -17,7 +17,7 @@ type CcCommenter struct {
 
 //register with global AvailableNodes map
 func init() {
-	AvailableNodes["CcCommenter"] = NewCcCommenter
+	AvailableNodes.Register("CcCommenter", NewCcCommenter)
 }
 
 func NewCcCommenter() (*CcCommenter, error) {
