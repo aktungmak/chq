@@ -26,6 +26,8 @@ func NewPatParser(pid int16) (*PatParser, error) {
 	node.input = make(chan TsPacket, CHAN_BUF_SIZE)
 	node.outputs = make([]chan<- TsPacket, 0)
 
+	node.PrevPats = make([]*Pat, 0)
+
 	go node.process()
 	return node, nil
 }
@@ -34,37 +36,43 @@ func (node *PatParser) process() {
 	defer node.closeDown()
 	// section_length is 12 bits value
 	secBuf := make([]byte, 4096)
-	secLen := 0
+	bufLen := 0
 	for pkt := range node.input {
 		node.PktsIn++
 		if pkt.Header.Pid == 0 {
-
-			//if pusi
-			if pkt.Header.Pusi {
+			if pkt.Header.Pusi { //yes pusi DONE
 				ptr := int(pkt.Payload[0])
-				if secLen == 0 {
-					// push data from the ptr onwards into the buffer
-					copy(secBuf[secLen:], pkt.Payload[ptr+1:])
-					secLen += len(pkt.Payload) - ptr - 1
-				} else { //(buf > 0)
+				if bufLen > 0 {
+					// push data up to the ptr into the buffer
+					copy(secBuf[bufLen:], pkt.Payload[1:ptr+1])
+					bufLen += len(pkt.Payload) - ptr - 1 // IS IT -1???
+					pat, err := NewPat(secBuf[:bufLen])
+					if err != nil {
+						log.Print(err)
+					} else {
+						if node.CurPat != nil && node.CurPat.Vn != pat.Vn {
+							node.PrevPats = append(node.PrevPats, node.CurPat)
+						}
+						node.CurPat = pat
+					}
+					bufLen = 0
 
-					//        push data up until the ptr
-					//        increment bufLen
-					//        parse buffer
-					//
-					//        set bufLen to 0
-					//        push data after the ptr
-					//
 				}
-			} else { //no pusi
-				if secLen > 0 {
-					if secLen+len(pkt.Payload) > 4096 {
+
+				// copy the next section into the buffer
+				copy(secBuf[bufLen:], pkt.Payload[ptr+1:])
+				bufLen += len(pkt.Payload) - ptr - 1
+
+			} else { //no pusi DONE
+				log.Print("line 64")
+				if bufLen > 0 {
+					if bufLen+len(pkt.Payload) > 4096 {
 						log.Print("PAT has overflowed the section buffer!")
-						secLen = 0
+						bufLen = 0
 						continue
 					} else {
-						//        push data into buffer
-						//        increment bufLen
+						copy(secBuf[bufLen:], pkt.Payload)
+						bufLen += len(pkt.Payload)
 					}
 				}
 

@@ -63,33 +63,33 @@ func TestNewAdaptationField(t *testing.T) {
 
 	// indicators
 	if af.Di != false {
-		t.Errorf("DI should be false, got %s", af.Di)
+		t.Errorf("DI should be false, got %t", af.Di)
 	}
 	if af.Rai != false {
-		t.Errorf("Rai should be false, got %s", af.Rai)
+		t.Errorf("Rai should be false, got %t", af.Rai)
 	}
 	if af.Espi != false {
-		t.Errorf("Espi should be false, got %s", af.Espi)
+		t.Errorf("Espi should be false, got %t", af.Espi)
 	}
 
 	// option flags
 	if af.Pcrf != true {
-		t.Errorf("Pcrf should be true, got %s", af.Pcrf)
+		t.Errorf("Pcrf should be true, got %t", af.Pcrf)
 	}
 	if af.Opcrf != false {
-		t.Errorf("Opcrf should be false, got %s", af.Opcrf)
+		t.Errorf("Opcrf should be false, got %t", af.Opcrf)
 	}
 	if af.Spf != false {
-		t.Errorf("Spf should be false, got %s", af.Spf)
+		t.Errorf("Spf should be false, got %t", af.Spf)
 	}
 	if af.Tpdf != false {
-		t.Errorf("Tpdf should be false, got %s", af.Tpdf)
+		t.Errorf("Tpdf should be false, got %t", af.Tpdf)
 	}
 	if af.Afef != false {
-		t.Errorf("Afef should be false, got %s", af.Afef)
+		t.Errorf("Afef should be false, got %t", af.Afef)
 	}
 	if af.Afef != false {
-		t.Errorf("Afef should be false, got %s", af.Afef)
+		t.Errorf("Afef should be false, got %t", af.Afef)
 	}
 
 	// optional fields (controled by flags)

@@ -13,7 +13,9 @@ type TsPacket struct {
 func NewTsPacket(data []byte) TsPacket {
 	hdr := NewTsPacketHeader(data)
 	af := NewAdaptationField(data)
-	payld := data[4+af.Length:]
+	// copy the data, don't reuse the backing array
+	// otherwise you will get a race!
+	payld := append([]byte(nil), data[4+af.Length:]...)
 
 	return TsPacket{
 		Header:          hdr,

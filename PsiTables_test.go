@@ -18,7 +18,7 @@ func TestNewPat(t *testing.T) {
 		t.Errorf("Table ID should be 0x0, got %x", pat.Tid)
 	}
 	if pat.Ssi != true {
-		t.Errorf("Section Syntax Indicator should be true, got %s", pat.Ssi)
+		t.Errorf("Section Syntax Indicator should be true, got %t", pat.Ssi)
 	}
 	if pat.Sl != 0x11 {
 		t.Errorf("Section Length should be 0x11, got %x", pat.Sl)
@@ -30,7 +30,7 @@ func TestNewPat(t *testing.T) {
 		t.Errorf("Version should be 0x2, got %x", pat.Vn)
 	}
 	if pat.Cni != true {
-		t.Errorf("Current/next indicator should be true, got %s", pat.Cni)
+		t.Errorf("Current/next indicator should be true, got %t", pat.Cni)
 	}
 	if pat.Sn != 0x0 {
 		t.Errorf("Section number should be 0x0, got %x", pat.Sn)
