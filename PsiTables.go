@@ -5,24 +5,27 @@ import (
 	"fmt"
 )
 
+// generic representation of a descriptor. TODO implement it!
+type descriptor struct{}
+
 // Represents a MPEG TS Program Association Table
 // see ISO 13818-1 section 2.4.4.3
 type Pat struct {
-	Tid  byte `mpeg:"table_id"`
-	Ssi  bool `mpeg:"section_syntax_indicator"`
-	Sl   int  `mpeg:"section_length"`
-	Tsid int  `mpeg:"transport_stream_id"`
-	Vn   int  `mpeg:"version_number"`
-	Cni  bool `mpeg:"current_next_indicator"`
-	Sn   byte `mpeg:"section_number"`
-	Lsn  byte `mpeg:"last_section_number"`
+	Tid  byte `json:"table_id"`
+	Ssi  bool `json:"section_syntax_indicator"`
+	Sl   int  `json:"section_length"`
+	Tsid int  `json:"transport_stream_id"`
+	Vn   int  `json:"version_number"`
+	Cni  bool `json:"current_next_indicator"`
+	Sn   byte `json:"section_number"`
+	Lsn  byte `json:"last_section_number"`
 	Pgms []pgm
-	Crc  uint32 `mpeg:"CRC_32"`
+	Crc  uint32 `json:"CRC_32"`
 }
 
 type pgm struct {
-	Pn    int   `mpeg:"program_number"`
-	Pmpid int16 `mpeg:"program_map_PID"`
+	Pn    int   `json:"program_number"`
+	Pmpid int16 `json:"program_map_PID"`
 }
 
 func NewPat(data []byte) (*Pat, error) {
@@ -58,4 +61,33 @@ func NewPat(data []byte) (*Pat, error) {
 	}
 
 	return pat, nil
+}
+
+// Represents a Programme Map Table
+// See ISO 13818-1 table 2-28
+type Pmt struct {
+	Tid         byte  `json:table_id`
+	Ssi         bool  `json:section_syntax_indicator`
+	Sl          int   `json:section_length`
+	Pn          int   `json:program_number`
+	Vn          int   `json:version_number`
+	Cni         bool  `json:current_next_indicator`
+	Sn          byte  `json:section_number`
+	Lsn         byte  `json:last_section_number`
+	Pcrpid      int16 `json:PCR_PID`
+	Pil         int   `json:program_info_length`
+	Descriptors []descriptor
+	Pels        []pel
+	Crc         uint32 `json:"CRC_32"`
+}
+type pel struct {
+	St          byte  `json:stream_type`
+	Pid         int16 `json:elementary_PID`
+	Eil         int   `json:ES_info_length`
+	Descriptors []descriptor
+}
+
+func NewPmt(data []byte) (*Pmt, error) {
+	pmt := &Pmt{}
+	return pmt, nil
 }

@@ -5,8 +5,8 @@ package main
 // The Comment field is used to mark errors in the packet etc
 type TsPacket struct {
 	Header          *TsPacketHeader
-	AdaptationField *AdaptationField `mpeg:"adaptation_field"`
-	Payload         []byte           `mpeg:"data_byte"`
+	AdaptationField *AdaptationField `json:"adaptation_field"`
+	Payload         []byte           `json:"data_byte"`
 	Comment         string           // can be used for logging, don't use newlines
 }
 
@@ -27,14 +27,14 @@ func NewTsPacket(data []byte) TsPacket {
 // Represents the 4-byte transport stream packet header
 // See ISO 13818-1 Table 2-2
 type TsPacketHeader struct {
-	SyncByte byte  `mpeg:"sync_byte"`
-	Tei      bool  `mpeg:"transport_error_indicator"`
-	Pusi     bool  `mpeg:"payload_unit_start_indicator"`
-	Tp       bool  `mpeg:"transport_priority"`
-	Pid      int16 `mpeg:"PID"`
-	Tsc      byte  `mpeg:"transport_scrambling_control"`
-	Afc      byte  `mpeg:"adaptation_field_control"`
-	Cc       byte  `mpeg:"continuity_counter"`
+	SyncByte byte  `json:"sync_byte"`
+	Tei      bool  `json:"transport_error_indicator"`
+	Pusi     bool  `json:"payload_unit_start_indicator"`
+	Tp       bool  `json:"transport_priority"`
+	Pid      int16 `json:"PID"`
+	Tsc      byte  `json:"transport_scrambling_control"`
+	Afc      byte  `json:"adaptation_field_control"`
+	Cc       byte  `json:"continuity_counter"`
 }
 
 // Constructor to create a new TS header struct
@@ -55,39 +55,39 @@ func NewTsPacketHeader(data []byte) *TsPacketHeader {
 // represents the optional adaptation field
 // see ISO 13818-1 Table 2-6
 type AdaptationField struct {
-	Length byte `mpeg:"adaptation_field_length"`
-	Di     bool `mpeg:"discontinuity_indicator"`
-	Rai    bool `mpeg:"random_access_indicator"`
-	Espi   bool `mpeg:"elementary_stream_priority_indicator"`
-	Pcrf   bool `mpeg:"PCR_flag"`
-	Opcrf  bool `mpeg:"OPCR_flag"`
-	Spf    bool `mpeg:"splicing_point_flag"`
-	Tpdf   bool `mpeg:"transport_private_data_flag"`
-	Afef   bool `mpeg:"adaptation_field_extension_flag"`
+	Length byte `json:"adaptation_field_length"`
+	Di     bool `json:"discontinuity_indicator"`
+	Rai    bool `json:"random_access_indicator"`
+	Espi   bool `json:"elementary_stream_priority_indicator"`
+	Pcrf   bool `json:"PCR_flag"`
+	Opcrf  bool `json:"OPCR_flag"`
+	Spf    bool `json:"splicing_point_flag"`
+	Tpdf   bool `json:"transport_private_data_flag"`
+	Afef   bool `json:"adaptation_field_extension_flag"`
 	//if PCR flag == 1
-	Pcrb int64 `mpeg:"program_clock_reference_base"`
-	Pcre int64 `mpeg:"program_clock_reference_extension"`
+	Pcrb int64 `json:"program_clock_reference_base"`
+	Pcre int64 `json:"program_clock_reference_extension"`
 	//if OPCR flag == 1
-	Opcrb int64 `mpeg:"original_program_clock_reference_base"`
-	Opcre int64 `mpeg:"original_program_clock_reference_extension"`
+	Opcrb int64 `json:"original_program_clock_reference_base"`
+	Opcre int64 `json:"original_program_clock_reference_extension"`
 	//if splicing_point_flag == 1
-	Sc byte `mpeg:"splice_countdown"`
+	Sc byte `json:"splice_countdown"`
 	//if transport_private_data_flag == 1
-	Tpdl byte   `mpeg:"transport_private_data_length"`
-	Tpd  []byte `mpeg:"private_data_byte"`
+	Tpdl byte   `json:"transport_private_data_length"`
+	Tpd  []byte `json:"private_data_byte"`
 	//if adaptation_field_extension_flag == 1
-	Afel byte `mpeg:"adaptation_field_extension_length"`
-	Ltwf bool `mpeg:"ltw_flag"`
-	Pwrf bool `mpeg:"piecewise_rate_flag"`
-	Ssf  bool `mpeg:"seamless_splice_flag"`
-	//if `mpeg:"ltw_flag` == "1
-	Ltwvf bool  `mpeg:"ltw_valid_flag"`
-	Ltwo  int16 `mpeg:"ltw_offset"`
-	//if `mpeg:"piecewise_rate_flag` == "1
-	Pwr int `mpeg:"piecewise_rate"`
-	//if `mpeg:"seamless_splice_flag` == "1
-	St  int   `mpeg:"splice_type"`
-	Dna int64 `mpeg:"DTS_next_AU"`
+	Afel byte `json:"adaptation_field_extension_length"`
+	Ltwf bool `json:"ltw_flag"`
+	Pwrf bool `json:"piecewise_rate_flag"`
+	Ssf  bool `json:"seamless_splice_flag"`
+	//if `json:"ltw_flag` == "1
+	Ltwvf bool  `json:"ltw_valid_flag"`
+	Ltwo  int16 `json:"ltw_offset"`
+	//if `json:"piecewise_rate_flag` == "1
+	Pwr int `json:"piecewise_rate"`
+	//if `json:"seamless_splice_flag` == "1
+	St  int   `json:"splice_type"`
+	Dna int64 `json:"DTS_next_AU"`
 }
 
 // Constructor to create a new adaptation field struct

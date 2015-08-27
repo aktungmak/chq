@@ -2,7 +2,7 @@
 # node cc ::= CcCommenter
 # node o ::= CommentWriter log.txt
 
-node f ::= FileInput 9XMRX95001.ts
+node f ::= FileInput mpts.ts
 node p ::= PidFilter 0
 node t ::= PatParser 0
 
