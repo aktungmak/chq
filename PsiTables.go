@@ -97,6 +97,9 @@ func NewPmt(data []byte) (*Pmt, error) {
 	if len(data) < 12 {
 		return pmt, errors.New("PMT data too short to parse!")
 	}
+	if data[0] != 0x2 {
+		return pmt, errors.New(fmt.Sprintf("Invalid Table ID %x for PMT!", data[0]))
+	}
 
 	pmt.Tid = data[0]
 	pmt.Ssi = data[1]&128 != 0

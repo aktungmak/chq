@@ -5,9 +5,9 @@
 node f ::= FileInput mpts.ts
 node p ::= PidFilter 0
 node t ::= PatParser 0
-node m ::= PmtParser
+node m ::= PmtParser 66
 
-conn f -> p -> t
+conn f ->     t -> m
 
 #conn f -> p -> c -> o
 #conn f -> p

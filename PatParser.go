@@ -41,7 +41,7 @@ func (node *PatParser) process() {
 	bufLen := 0
 	for pkt := range node.input {
 		node.PktsIn++
-		if pkt.Header.Pid == 0 {
+		if pkt.Header.Pid == node.Pid {
 			if pkt.Header.Pusi { //yes pusi DONE
 				ptr := int(pkt.Payload[0])
 				if bufLen > 0 {
@@ -79,10 +79,10 @@ func (node *PatParser) process() {
 
 			}
 
-			for _, output := range node.outputs {
-				node.PktsOut++
-				output <- pkt
-			}
+		}
+		for _, output := range node.outputs {
+			node.PktsOut++
+			output <- pkt
 		}
 	}
 }

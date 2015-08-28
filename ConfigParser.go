@@ -34,8 +34,7 @@ func (r *Router) ApplyConfig(config string) error {
 
 		}
 		if err != nil {
-			// repackage with line num!
-			fmt.Print(err)
+			// TODO repackage with line num!
 			return err
 		}
 	}

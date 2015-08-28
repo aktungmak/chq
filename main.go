@@ -22,7 +22,8 @@ func main() {
 
 	rtr := NewRouter()
 	cfgdat, _ := ioutil.ReadFile("basic.chq")
-	rtr.ApplyConfig(string(cfgdat))
+	err := rtr.ApplyConfig(string(cfgdat))
+	Check(err)
 
 	out := make(chan TsPacket)
 
