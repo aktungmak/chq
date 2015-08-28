@@ -1,40 +1,38 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
 )
 
-// PatParser watches the incoming TS packets for
-// PID 0. It will try to reassemble these into a
-// complete section, and then parse as a PAT.
+// PmtParser watches the incoming TS packets for
+// its Pid. It will try to reassemble these into a
+// complete section, and then parse as a Pmt.
 // When the version number changes, it will push
-// the CurPat onto the slice of PrevPats.
-type PatParser struct {
-	PrevPats []*Pat
-	CurPat   *Pat
+// the CurPmt onto the slice of PrevPmts.
+type PmtParser struct {
+	PrevPmts []*Pmt
+	CurPmt   *Pmt
 	Pid      int16
 	TsNode
 }
 
 //register with global AvailableNodes map
 func init() {
-	AvailableNodes.Register("PatParser", NewPatParser)
+	AvailableNodes.Register("PmtParser", NewPmtParser)
 }
 
-func NewPatParser(pid int16) (*PatParser, error) {
-	node := &PatParser{}
+func NewPmtParser(pid int16) (*PmtParser, error) {
+	node := &PmtParser{}
 	node.input = make(chan TsPacket, CHAN_BUF_SIZE)
 	node.outputs = make([]chan<- TsPacket, 0)
 
-	node.PrevPats = make([]*Pat, 0)
-	node.Pid = pid
+	node.PrevPmts = make([]*Pmt, 0)
 
 	go node.process()
 	return node, nil
 }
 
-func (node *PatParser) process() {
+func (node *PmtParser) process() {
 	defer node.closeDown()
 	// section_length is 12 bits value
 	secBuf := make([]byte, 4096)
@@ -42,20 +40,20 @@ func (node *PatParser) process() {
 	for pkt := range node.input {
 		node.PktsIn++
 		if pkt.Header.Pid == 0 {
-			if pkt.Header.Pusi { //yes pusi DONE
+			if pkt.Header.Pusi {
 				ptr := int(pkt.Payload[0])
 				if bufLen > 0 {
 					// push data up to the ptr into the buffer
 					copy(secBuf[bufLen:], pkt.Payload[1:ptr+1])
 					bufLen += len(pkt.Payload) - ptr - 1 // IS IT -1???
-					pat, err := NewPat(secBuf[:bufLen])
+					pmt, err := NewPmt(secBuf[:bufLen])
 					if err != nil {
 						log.Print(err)
 					} else {
-						if node.CurPat != nil && node.CurPat.Vn != pat.Vn {
-							node.PrevPats = append(node.PrevPats, node.CurPat)
+						if node.CurPmt != nil && node.CurPmt.Vn != pmt.Vn {
+							node.PrevPmts = append(node.PrevPmts, node.CurPmt)
 						}
-						node.CurPat = pat
+						node.CurPmt = pmt
 					}
 					bufLen = 0
 
@@ -65,10 +63,10 @@ func (node *PatParser) process() {
 				copy(secBuf[bufLen:], pkt.Payload[ptr+1:])
 				bufLen += len(pkt.Payload) - ptr - 1
 
-			} else { //no pusi DONE
+			} else {
 				if bufLen > 0 {
 					if bufLen+len(pkt.Payload) > 4096 {
-						log.Print("PAT has overflowed the section buffer!")
+						log.Print("PMT has overflowed the section buffer!")
 						bufLen = 0
 						continue
 					} else {
@@ -87,13 +85,9 @@ func (node *PatParser) process() {
 	}
 }
 
-func (node *PatParser) closeDown() {
-	log.Print("closing down PatParser")
+func (node *PmtParser) closeDown() {
+	log.Print("closing down PmtParser")
 	for _, output := range node.outputs {
 		close(output)
 	}
-}
-
-func (node *PatParser) ToJson() ([]byte, error) {
-	return json.Marshal(node)
 }

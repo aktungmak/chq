@@ -5,6 +5,7 @@
 node f ::= FileInput mpts.ts
 node p ::= PidFilter 0
 node t ::= PatParser 0
+node m ::= PmtParser
 
 conn f -> p -> t
 
