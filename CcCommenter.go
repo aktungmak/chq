@@ -24,7 +24,6 @@ func NewCcCommenter() (*CcCommenter, error) {
 	node := &CcCommenter{}
 	node.CurCc = make(map[int16]byte)
 	node.input = make(chan TsPacket, CHAN_BUF_SIZE)
-	node.outputs = make([]chan<- TsPacket, 0)
 
 	go node.process()
 	return node, nil
@@ -51,15 +50,11 @@ func (node *CcCommenter) process() {
 			}
 		}
 
-		for _, output := range node.outputs {
-			output <- pkt
-		}
+		node.output.Send(pkt)
 	}
 }
 
 func (node *CcCommenter) closeDown() {
 	log.Print("closing down CcCommenter")
-	for _, output := range node.outputs {
-		close(output)
-	}
+	node.output.Close()
 }

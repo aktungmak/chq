@@ -27,7 +27,6 @@ func NewFileInput(fname string) (*FileInput, error) {
 	node := &FileInput{}
 	node.file = fh
 	node.input = nil
-	node.outputs = make([]chan<- TsPacket, 0)
 
 	go node.process()
 	return node, nil
@@ -55,10 +54,7 @@ func (node *FileInput) process() {
 			}
 			pkt := NewTsPacket(buf[i : i+TS_PKT_SIZE])
 			node.PktsIn++
-			for _, output := range node.outputs {
-				node.PktsOut++
-				output <- pkt
-			}
+			node.output.Send(pkt)
 		}
 	}
 }
@@ -66,7 +62,5 @@ func (node *FileInput) process() {
 func (node *FileInput) closeDown() {
 	log.Printf("closing down file input for file %s", node.file.Name())
 	node.file.Close()
-	for _, output := range node.outputs {
-		close(output)
-	}
+	node.output.Close()
 }

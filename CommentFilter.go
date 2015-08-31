@@ -22,7 +22,6 @@ func NewCommentFilter(fname string) (*CommentFilter, error) {
 
 	node := &CommentFilter{}
 	node.input = make(chan TsPacket, CHAN_BUF_SIZE)
-	node.outputs = make([]chan<- TsPacket, 0)
 
 	go node.process()
 	return node, nil
@@ -33,17 +32,12 @@ func (node *CommentFilter) process() {
 	for pkt := range node.input {
 		node.PktsIn++
 		if len(pkt.Comment) > 0 {
-			for _, output := range node.outputs {
-				node.PktsOut++
-				output <- pkt
-			}
+			node.output.Send(pkt)
 		}
 	}
 }
 
 func (node *CommentFilter) closeDown() {
 	log.Print("closing down CommentFilter")
-	for _, output := range node.outputs {
-		close(output)
-	}
+	node.output.Close()
 }

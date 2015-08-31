@@ -27,7 +27,6 @@ func NewNetInput(address string, port int) (*NetInput, error) {
 		IP:   net.ParseIP(address),
 	}
 	n.input = nil
-	n.outputs = make([]chan<- TsPacket, 0)
 
 	// the stream may be unicast or multicast, so choose appropriately
 	if n.addr.IP.IsMulticast() {
@@ -80,17 +79,13 @@ func (node *NetInput) process() {
 		for i := m; i < n; i += packetsize {
 			pkt := NewTsPacket(packet[i : i+packetsize])
 			node.PktsIn++
-			for _, output := range node.outputs {
-				node.PktsOut++
-				output <- pkt
-			}
+			node.output.Send(pkt)
 		}
 	}
 }
 
 func (node *NetInput) closeDown() {
+	log.Printf("Closing down NetInput on %s@%d", node.addr.IP, node.addr.Port)
 	node.conn.Close()
-	for _, output := range node.outputs {
-		close(output)
-	}
+	node.output.Close()
 }

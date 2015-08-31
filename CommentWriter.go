@@ -28,7 +28,6 @@ func NewCommentWriter(fname string) (*CommentWriter, error) {
 	node := &CommentWriter{}
 	node.file = fh
 	node.input = make(chan TsPacket, CHAN_BUF_SIZE)
-	node.outputs = make([]chan<- TsPacket, 0)
 
 	go node.process()
 	return node, nil
@@ -40,16 +39,12 @@ func (node *CommentWriter) process() {
 		if pkt.Comment != "" {
 			node.file.WriteString(pkt.Comment + "\n")
 		}
-		for _, output := range node.outputs {
-			output <- pkt
-		}
+		node.output.Send(pkt)
 	}
 }
 
 func (node *CommentWriter) closeDown() {
 	node.file.Close()
 	log.Printf("closing down CommentWriter to file %s", node.file.Name())
-	for _, output := range node.outputs {
-		close(output)
-	}
+	node.output.Close()
 }

@@ -25,7 +25,6 @@ func init() {
 func NewPatParser(pid int16) (*PatParser, error) {
 	node := &PatParser{}
 	node.input = make(chan TsPacket, CHAN_BUF_SIZE)
-	node.outputs = make([]chan<- TsPacket, 0)
 
 	node.PrevPats = make([]*Pat, 0)
 	node.Pid = pid
@@ -80,18 +79,13 @@ func (node *PatParser) process() {
 			}
 
 		}
-		for _, output := range node.outputs {
-			node.PktsOut++
-			output <- pkt
-		}
+		node.output.Send(pkt)
 	}
 }
 
 func (node *PatParser) closeDown() {
 	log.Print("closing down PatParser")
-	for _, output := range node.outputs {
-		close(output)
-	}
+	node.output.Close()
 }
 
 func (node *PatParser) ToJson() ([]byte, error) {

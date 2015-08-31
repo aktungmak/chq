@@ -21,7 +21,6 @@ func NewPidDropper(pid int16) (*PidDropper, error) {
 	node := &PidDropper{}
 	node.Pid = pid
 	node.input = make(chan TsPacket, CHAN_BUF_SIZE)
-	node.outputs = make([]chan<- TsPacket, 0)
 
 	go node.process()
 	return node, nil
@@ -31,16 +30,12 @@ func (node *PidDropper) process() {
 	defer node.closeDown()
 	for pkt := range node.input {
 		if pkt.Header.Pid != node.Pid {
-			for _, output := range node.outputs {
-				output <- pkt
-			}
+			node.output.Send(pkt)
 		}
 	}
 }
 
 func (node *PidDropper) closeDown() {
 	log.Printf("closing down pid dropper for pid %d", node.Pid)
-	for _, output := range node.outputs {
-		close(output)
-	}
+	node.output.Close()
 }

@@ -10,10 +10,18 @@ import (
 // must be embedded in any new Node struct.
 type TsNode struct {
 	input   chan TsPacket
-	outputs []chan<- TsPacket
+	output  Broadcaster
 	PktsIn  int64 //counters
 	PktsOut int64
 }
+
+// // read a packet off the input. second value is
+// // false if the input channel is closed.
+// func (node *TsNode) GetPacket() (TsPacket, bool) {
+// 	data, ok := <-node.input
+// 	pkt := TsPacket(data)
+// 	return pkt, ok
+// }
 
 // accessor to get this node's input channel
 func (node *TsNode) GetInputChan() chan TsPacket {
@@ -21,19 +29,20 @@ func (node *TsNode) GetInputChan() chan TsPacket {
 }
 
 // add a new listener to the output list
-func (node *TsNode) RegisterListener(newout chan<- TsPacket) {
-	node.outputs = append(node.outputs, newout)
+func (node *TsNode) RegisterListener(newout chan TsPacket) {
+	node.output.RegisterChan(newout)
 }
 
 // remove a particular listener from the outputs slice
 // does nothing if the chan is not registered
-func (node *TsNode) UnRegisterListener(toremove chan<- TsPacket) {
+func (node *TsNode) UnRegisterListener(toremove chan TsPacket) {
 	for i, op := range node.outputs {
 		if op == toremove {
 			node.outputs = append(node.outputs[:i], node.outputs[i+1:]...)
 			break
 		}
 	}
+
 }
 
 // dump a representation of this node to JSON

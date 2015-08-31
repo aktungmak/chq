@@ -25,7 +25,6 @@ func init() {
 func NewPmtParser(pid int16) (*PmtParser, error) {
 	node := &PmtParser{}
 	node.input = make(chan TsPacket, CHAN_BUF_SIZE)
-	node.outputs = make([]chan<- TsPacket, 0)
 
 	node.PrevPmts = make([]*Pmt, 0)
 	node.Pid = pid
@@ -80,18 +79,13 @@ func (node *PmtParser) process() {
 			}
 
 		}
-		for _, output := range node.outputs {
-			node.PktsOut++
-			output <- pkt
-		}
+		node.output.Send(pkt)
 	}
 }
 
 func (node *PmtParser) closeDown() {
 	log.Print("closing down PmtParser")
-	for _, output := range node.outputs {
-		close(output)
-	}
+	node.output.Close()
 }
 
 func (node *PmtParser) ToJson() ([]byte, error) {

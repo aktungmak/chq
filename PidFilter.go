@@ -22,7 +22,6 @@ func NewPidFilter(pid int16) (*PidFilter, error) {
 	node := &PidFilter{}
 	node.Pid = pid
 	node.input = make(chan TsPacket, CHAN_BUF_SIZE)
-	node.outputs = make([]chan<- TsPacket, 0)
 
 	go node.process()
 	return node, nil
@@ -32,16 +31,12 @@ func (node *PidFilter) process() {
 	defer node.closeDown()
 	for pkt := range node.input {
 		if pkt.Header.Pid == node.Pid {
-			for _, output := range node.outputs {
-				output <- pkt
-			}
+			node.output.Send(pkt)
 		}
 	}
 }
 
 func (node *PidFilter) closeDown() {
-	log.Printf("closing down pid filter for pid %d", node.Pid)
-	for _, output := range node.outputs {
-		close(output)
-	}
+	log.Printf("closing down PidFilter for pid %d", node.Pid)
+	node.output.Close()
 }
