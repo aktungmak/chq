@@ -30,6 +30,7 @@ func (node *PidDropper) process() {
 	defer node.closeDown()
 	for pkt := range node.input {
 		if pkt.Header.Pid != node.Pid {
+			node.PktsOut++
 			node.output.Send(pkt)
 		}
 	}

@@ -36,9 +36,9 @@ func (node *TsNode) RegisterListener(newout chan TsPacket) {
 // remove a particular listener from the outputs slice
 // does nothing if the chan is not registered
 func (node *TsNode) UnRegisterListener(toremove chan TsPacket) {
-	for i, op := range node.outputs {
-		if op == toremove {
-			node.outputs = append(node.outputs[:i], node.outputs[i+1:]...)
+	for id, ch := range node.output.listeners {
+		if ch == toremove {
+			delete(node.output.listeners, id)
 			break
 		}
 	}

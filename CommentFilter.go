@@ -32,6 +32,7 @@ func (node *CommentFilter) process() {
 	for pkt := range node.input {
 		node.PktsIn++
 		if len(pkt.Comment) > 0 {
+			node.PktsOut++
 			node.output.Send(pkt)
 		}
 	}

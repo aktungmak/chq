@@ -79,6 +79,7 @@ func (node *NetInput) process() {
 		for i := m; i < n; i += packetsize {
 			pkt := NewTsPacket(packet[i : i+packetsize])
 			node.PktsIn++
+			node.PktsOut++
 			node.output.Send(pkt)
 		}
 	}

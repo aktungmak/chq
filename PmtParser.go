@@ -79,6 +79,7 @@ func (node *PmtParser) process() {
 			}
 
 		}
+		node.PktsOut++
 		node.output.Send(pkt)
 	}
 }

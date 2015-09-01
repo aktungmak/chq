@@ -39,6 +39,7 @@ func (node *CommentWriter) process() {
 		if pkt.Comment != "" {
 			node.file.WriteString(pkt.Comment + "\n")
 		}
+		node.PktsOut++
 		node.output.Send(pkt)
 	}
 }

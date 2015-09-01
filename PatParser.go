@@ -79,6 +79,7 @@ func (node *PatParser) process() {
 			}
 
 		}
+		node.PktsOut++
 		node.output.Send(pkt)
 	}
 }

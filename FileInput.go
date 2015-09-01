@@ -54,6 +54,7 @@ func (node *FileInput) process() {
 			}
 			pkt := NewTsPacket(buf[i : i+TS_PKT_SIZE])
 			node.PktsIn++
+			node.PktsOut++
 			node.output.Send(pkt)
 		}
 	}

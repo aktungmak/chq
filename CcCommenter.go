@@ -49,7 +49,7 @@ func (node *CcCommenter) process() {
 				}
 			}
 		}
-
+		node.PktsOut++
 		node.output.Send(pkt)
 	}
 }
