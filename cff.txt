@@ -1,3 +1,5 @@
-1. Config file parsing
-2. Trap sender
-3.
+TODO feature list
+
+SCTE35 node
+server struct to manage router and http access
+Trap sender
