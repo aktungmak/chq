@@ -54,3 +54,16 @@ func (b *Broadcaster) RegisterChan(ch chan TsPacket) {
 	}
 	b.listeners[b.nextId] = ch
 }
+func (b *Broadcaster) UnRegisterChan(ch chan TsPacket) {
+	b.m.Lock()
+	defer b.m.Unlock()
+	if b.listeners == nil {
+		b.listeners = make(map[int]chan<- TsPacket)
+	}
+	for id, ch := range b.listeners {
+		if ch == toremove {
+			delete(b.listeners, id)
+			break
+		}
+	}
+}
