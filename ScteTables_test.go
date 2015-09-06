@@ -28,8 +28,8 @@ func TestNewScte35SpliceInfo(t *testing.T) {
 	if sis.Pi != false {
 		t.Errorf("Private Indicator should be false, got %t", sis.Sl)
 	}
-	if sis.Sl != 0x25 {
-		t.Errorf("Section Length should be 0x25, got %x", sis.Sl)
+	if sis.Sl != 0x20 {
+		t.Errorf("Section Length should be 0x20, got %x", sis.Sl)
 	}
 	if sis.Pv != 0x0 {
 		t.Errorf("Protocol Version should be 0x0, got %x", sis.Pv)
@@ -52,8 +52,8 @@ func TestNewScte35SpliceInfo(t *testing.T) {
 	if sis.Scl != 0xfff {
 		t.Errorf("Splice Command len should be 0xfff, got %x", sis.Scl)
 	}
-	if sis.Sct != 0x25 {
-		t.Errorf("Splice Command type should be 0x25, got %x", sis.Sct)
+	if sis.Sct != 0x5 {
+		t.Errorf("Splice Command type should be 0x5, got %x", sis.Sct)
 	}
 
 	// ensure CRC was copied correctly
