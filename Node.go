@@ -15,14 +15,6 @@ type TsNode struct {
 	PktsOut int64
 }
 
-// // read a packet off the input. second value is
-// // false if the input channel is closed.
-// func (node *TsNode) GetPacket() (TsPacket, bool) {
-// 	data, ok := <-node.input
-// 	pkt := TsPacket(data)
-// 	return pkt, ok
-// }
-
 // accessor to get this node's input channel
 func (node *TsNode) GetInputChan() chan TsPacket {
 	return node.input

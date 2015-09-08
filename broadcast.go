@@ -60,9 +60,9 @@ func (b *Broadcaster) UnRegisterChan(ch chan TsPacket) {
 	if b.listeners == nil {
 		b.listeners = make(map[int]chan<- TsPacket)
 	}
-	for id, ch := range b.listeners {
-		if ch == toremove {
-			delete(b.listeners, id)
+	for i, c := range b.listeners {
+		if c == ch {
+			delete(b.listeners, i)
 			break
 		}
 	}
