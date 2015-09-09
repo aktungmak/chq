@@ -84,11 +84,16 @@ func NewScte35SpliceInfo(data []byte) (*Scte35SpliceInfo, error) {
 		return sis, errors.New("SCTE35 reserved splice command type!")
 	}
 
+	end := len(data) - 1
+	if sis.Ep {
+		sis.Ecrc = uint32(data[end-4]) + uint32(data[end-5])<<8 + uint32(data[end-6])<<16 + uint32(data[end-7])<<24
+	}
+	sis.Crc = uint32(data[end]) + uint32(data[end-1])<<8 + uint32(data[end-2])<<16 + uint32(data[end-3])<<24
+
 	return sis, nil
 }
 
-type Scte35SpliceNull struct {
-}
+type Scte35SpliceNull struct{}
 
 type Scte35SpliceSchedule struct {
 	Sc   byte
@@ -96,15 +101,40 @@ type Scte35SpliceSchedule struct {
 }
 
 type Scte35SpliceInsert struct {
+	Seid uint32 `json:"splice_event_id"`
+	Seci bool   `json:"splice_event_cancel_indicator"`
+	Ooni bool   `json:"out_of_network_indicator"`
+	Psf  bool   `json:"program_splice_flag"`
+	Df   bool   `json:"duration_flag"`
+	Sif  bool   `json:"splice_immediate_flag"`
+	*spliceTime
+	Cc int `json:"component_count"`
+	// TODO component splices
+	*breakDuration
+	Upid int  `json:"unique_program_id"`
+	An   byte `json:"avail_num"`
+	Ae   byte `json:"avails_expected"`
 }
 
 type Scte35TimeSignal struct {
+	*spliceTime
 }
 
-type Scte35BandwidthReservation struct {
-}
+type Scte35BandwidthReservation struct{}
 
 type Scte35PrivateCommand struct {
+	Id uint32 `json:"identifier"`
+	Pb []byte `json:"private_byte"`
+}
+
+type spliceTime struct {
+	Tsf  bool  `json:"time_specified_flag"`
+	Ptst int64 `json:"pts_time"`
+}
+
+type breakDuration struct {
+	Ar bool  `json:"auto_return"`
+	D  int64 `json:"duration"`
 }
 
 func NewScte35SpliceNull(data []byte) (*Scte35SpliceNull, error) {
@@ -123,7 +153,9 @@ func NewScte35SpliceSchedule(data []byte) (*Scte35SpliceSchedule, error) {
 
 }
 func NewScte35SpliceInsert(data []byte) (*Scte35SpliceInsert, error) {
-	return &Scte35SpliceInsert{}, nil
+	si := &Scte35SpliceInsert{}
+
+	return si, nil
 
 }
 func NewScte35TimeSignal(data []byte) (*Scte35TimeSignal, error) {

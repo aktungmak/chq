@@ -46,8 +46,8 @@ func TestNewScte35SpliceInfo(t *testing.T) {
 	if sis.Cwi != 0x0 {
 		t.Errorf("CW index should be 0x0, got %x", sis.Cwi)
 	}
-	if sis.Tier != 0x0 {
-		t.Errorf("Tier should be 0x0, got %x", sis.Tier)
+	if sis.Tier != 0xfff {
+		t.Errorf("Tier should be 0xfff, got %x", sis.Tier)
 	}
 	if sis.Scl != 0xfff {
 		t.Errorf("Splice Command len should be 0xfff, got %x", sis.Scl)
