@@ -56,6 +56,11 @@ func TestNewScte35SpliceInfo(t *testing.T) {
 		t.Errorf("Splice Command type should be 0x5, got %x", sis.Sct)
 	}
 
+	// splice insert command
+	if sis.scte35SpliceInsert == nil {
+		t.Fatal("Splice insert field has not been populated!")
+	}
+
 	// ensure CRC was copied correctly
 	if sis.Crc != 0xd0f1edb5 {
 		t.Errorf("CRC was not copied correctly, expected 0xd0f1edb5 got %x", sis.Crc)

@@ -5,8 +5,8 @@ import (
 	"fmt"
 )
 
-// represents a SCTE35 splice_info_section
-// see SCTE35-2013 table 7-1
+// represents a sCTE35 splice_info_section
+// see sCTE35-2013 table 7-1
 type Scte35SpliceInfo struct {
 	Tid                         byte  `json:"table_id"`
 	Ssi                         bool  `json:"section_syntax_indicator"`
@@ -20,12 +20,12 @@ type Scte35SpliceInfo struct {
 	Tier                        int   `json:"tier"`
 	Scl                         int   `json:"splice_command_length"`
 	Sct                         byte  `json:"splice_command_type"`
-	*Scte35SpliceNull           `json:"splice_null,omitempty"`
-	*Scte35SpliceSchedule       `json:"splice_schedule,omitempty"`
-	*Scte35SpliceInsert         `json:"splice_insert,omitempty"`
-	*Scte35TimeSignal           `json:"time_signal,omitempty"`
-	*Scte35BandwidthReservation `json:"bandwidth_reservation,omitempty"`
-	*Scte35PrivateCommand       `json:"private_command,omitempty"`
+	*scte35SpliceNull           `json:"splice_null,omitempty"`
+	*scte35SpliceSchedule       `json:"splice_schedule,omitempty"`
+	*scte35SpliceInsert         `json:"splice_insert,omitempty"`
+	*scte35TimeSignal           `json:"time_signal,omitempty"`
+	*scte35BandwidthReservation `json:"bandwidth_reservation,omitempty"`
+	*scte35PrivateCommand       `json:"private_command,omitempty"`
 	Dll                         int `json:"descriptor_loop_length"`
 	Descriptors                 []descriptor
 	Ecrc                        uint32 `json:"E_CRC_32"`
@@ -33,7 +33,14 @@ type Scte35SpliceInfo struct {
 }
 
 func NewScte35SpliceInfo(data []byte) (*Scte35SpliceInfo, error) {
+	var err error
 	sis := &Scte35SpliceInfo{}
+	defer func() {
+		if r := recover(); r != nil {
+			err = errors.New("Malformed SCTE35 splice_info_section")
+		}
+	}()
+
 	if len(data) < 8 {
 		return sis, errors.New("SCTE35 data too short to parse!")
 	}
@@ -63,7 +70,7 @@ func NewScte35SpliceInfo(data []byte) (*Scte35SpliceInfo, error) {
 	case 0x00:
 		// splice_null
 		fmt.Printf("splice_null\n")
-		sis.Scte35SpliceNull, _ = NewScte35SpliceNull(data[14:])
+		sis.scte35SpliceNull, _ = newScte35SpliceNull(data[14:])
 	case 0x04:
 		// splice_schedule
 		fmt.Printf("splice_schedule\n")
@@ -81,10 +88,10 @@ func NewScte35SpliceInfo(data []byte) (*Scte35SpliceInfo, error) {
 		fmt.Printf("private_command\n")
 	default:
 		// reserved
-		return sis, errors.New("SCTE35 reserved splice command type!")
+		return sis, errors.New("Unsupported SCTE35 reserved splice command type!")
 	}
 
-	end := len(data) - 1
+	end := sis.Sl + 3
 	if sis.Ep {
 		sis.Ecrc = uint32(data[end-4]) + uint32(data[end-5])<<8 + uint32(data[end-6])<<16 + uint32(data[end-7])<<24
 	}
@@ -93,38 +100,119 @@ func NewScte35SpliceInfo(data []byte) (*Scte35SpliceInfo, error) {
 	return sis, nil
 }
 
-type Scte35SpliceNull struct{}
+type scte35SpliceNull struct{}
 
-type Scte35SpliceSchedule struct {
+func newScte35SpliceNull(data []byte) (*scte35SpliceNull, error) {
+	return &scte35SpliceNull{}, nil
+}
+
+type scte35SpliceSchedule struct {
 	Sc   byte
-	Sins []*Scte35SpliceInsert
+	Sins []*scte35SpliceInsert
 }
 
-type Scte35SpliceInsert struct {
-	Seid uint32 `json:"splice_event_id"`
-	Seci bool   `json:"splice_event_cancel_indicator"`
-	Ooni bool   `json:"out_of_network_indicator"`
-	Psf  bool   `json:"program_splice_flag"`
-	Df   bool   `json:"duration_flag"`
-	Sif  bool   `json:"splice_immediate_flag"`
-	*spliceTime
-	Cc int `json:"component_count"`
+func newScte35SpliceSchedule(data []byte) (*scte35SpliceSchedule, error) {
+	ss := &scte35SpliceSchedule{}
+	if len(data) < 1 {
+		return ss, errors.New("SCTE35 splice_schedule command data is too short to parse!")
+	}
+	ss.Sc = data[0]
+	for i := 1; i < len(data); i += 1 {
+		// si, err := newscte35SpliceInsert(data[i:])
+	}
+	return ss, nil
+
+}
+
+type scte35SpliceInsert struct {
+	Seid        uint32 `json:"splice_event_id"`
+	Seci        bool   `json:"splice_event_cancel_indicator"`
+	Ooni        bool   `json:"out_of_network_indicator"`
+	Psf         bool   `json:"program_splice_flag"`
+	Df          bool   `json:"duration_flag"`
+	Sif         bool   `json:"splice_immediate_flag"`
+	*spliceTime `json:"splice_time,omitempty"`
+	Cc          int `json:"component_count"`
 	// TODO component splices
-	*breakDuration
-	Upid int  `json:"unique_program_id"`
-	An   byte `json:"avail_num"`
-	Ae   byte `json:"avails_expected"`
+	*breakDuration `json:"break_duration,omitempty"`
+	Upid           int  `json:"unique_program_id"`
+	An             byte `json:"avail_num"`
+	Ae             byte `json:"avails_expected"`
 }
 
-type Scte35TimeSignal struct {
+func newScte35SpliceInsert(data []byte) (*scte35SpliceInsert, error) {
+	si := &scte35SpliceInsert{}
+	si.Seid = (uint32(data[0]) << 24) + (uint32(data[1]) << 16) + (uint32(data[2]) << 8) + uint32(data[3])
+	si.Seci = data[4]&128 != 0
+	si.Ooni = data[5]&128 != 0
+	si.Psf = data[5]&64 != 0
+	si.Df = data[5]&32 != 0
+	si.Sif = data[5]&16 != 0
+
+	// keep track of option field length
+	i := 6
+
+	if si.Psf && si.Sif {
+		st, err := newSpliceTime(data[i:])
+		if err != nil {
+			return si, err
+		}
+		if st.Tsf {
+			i += 5
+		} else {
+			i += 1
+		}
+	}
+
+	if si.Psf {
+		si.Cc = int(data[i])
+		cs := make([]*elementaryPidData, 0)
+		for j := 0; j < si.CC; j++ {
+			epd := *elementaryPidData{}
+			epd.Ct = data[i]
+			i += 1
+			if !si.Sif {
+				// epd.spliceTime =
+			}
+			cs = append(cs, epd)
+		}
+	}
+
+	if si.Df {
+		bd, err := newBreakDuration(data[i:])
+		if err != nil {
+			return si, err
+		}
+		i += 5
+	}
+
+	si.Upid = (int(data[i]) << 8) + int(data[i+1])
+	si.An = data[i+2]
+	si.Ae = data[i+3]
+	return si, nil
+}
+
+type scte35TimeSignal struct {
 	*spliceTime
 }
 
-type Scte35BandwidthReservation struct{}
+func newScte35TimeSignal(data []byte) (*scte35TimeSignal, error) {
+	return &scte35TimeSignal{}, nil
+}
 
-type Scte35PrivateCommand struct {
+type scte35BandwidthReservation struct{}
+
+func newScte35BandwidthReservation(data []byte) (*scte35BandwidthReservation, error) {
+	return &scte35BandwidthReservation{}, nil
+}
+
+type scte35PrivateCommand struct {
 	Id uint32 `json:"identifier"`
 	Pb []byte `json:"private_byte"`
+}
+
+func newScte35PrivateCommand(data []byte) (*scte35PrivateCommand, error) {
+	return &scte35PrivateCommand{}, nil
 }
 
 type spliceTime struct {
@@ -132,38 +220,20 @@ type spliceTime struct {
 	Ptst int64 `json:"pts_time"`
 }
 
+func newSpliceTime(data []byte) (*spliceTime, error) {
+	return &spliceTime{}, nil
+}
+
 type breakDuration struct {
 	Ar bool  `json:"auto_return"`
 	D  int64 `json:"duration"`
 }
 
-func NewScte35SpliceNull(data []byte) (*Scte35SpliceNull, error) {
-	return &Scte35SpliceNull{}, nil
+func newBreakDuration(data []byte) (*breakDuration, error) {
+	return &breakDuration{}, nil
 }
-func NewScte35SpliceSchedule(data []byte) (*Scte35SpliceSchedule, error) {
-	ss := &Scte35SpliceSchedule{}
-	if len(data) < 1 {
-		return ss, errors.New("SCTE35 splice_schedule command data is too short to parse!")
-	}
-	ss.Sc = data[0]
-	for i := 1; i < len(data); i += 1 {
-		// si, err := NewScte35SpliceInsert(data[i:])
-	}
-	return ss, nil
 
-}
-func NewScte35SpliceInsert(data []byte) (*Scte35SpliceInsert, error) {
-	si := &Scte35SpliceInsert{}
-
-	return si, nil
-
-}
-func NewScte35TimeSignal(data []byte) (*Scte35TimeSignal, error) {
-	return &Scte35TimeSignal{}, nil
-}
-func NewScte35BandwidthReservation(data []byte) (*Scte35BandwidthReservation, error) {
-	return &Scte35BandwidthReservation{}, nil
-}
-func NewScte35PrivateCommand(data []byte) (*Scte35PrivateCommand, error) {
-	return &Scte35PrivateCommand{}, nil
+type elementaryPidData struct {
+	Ct          byte `json:"component_tag"`
+	*spliceTime `json:"splice_time,omitempty"`
 }
