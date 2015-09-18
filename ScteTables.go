@@ -32,9 +32,8 @@ type Scte35SpliceInfo struct {
 	Crc                         uint32 `json:"CRC_32"`
 }
 
-func NewScte35SpliceInfo(data []byte) (*Scte35SpliceInfo, error) {
-	var err error
-	sis := &Scte35SpliceInfo{}
+func NewScte35SpliceInfo(data []byte) (sis *Scte35SpliceInfo, err error) {
+	sis = &Scte35SpliceInfo{}
 	defer func() {
 		if r := recover(); r != nil {
 			err = errors.New("Malformed SCTE35 splice_info_section")
@@ -168,7 +167,7 @@ func newScte35SpliceInsert(data []byte) (*scte35SpliceInsert, error) {
 		si.Cc = int(data[i])
 		cs := make([]*elementaryPidData, 0)
 		for j := 0; j < si.CC; j++ {
-			epd := *elementaryPidData{}
+			epd := &elementaryPidData{}
 			epd.Ct = data[i]
 			i += 1
 			if !si.Sif {
