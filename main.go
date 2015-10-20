@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"io/ioutil"
 	"log"
 )
@@ -14,59 +13,36 @@ func Check(err error) {
 
 func main() {
 	log.Print("starting")
+	var err error
+	cfgdat, _ := ioutil.ReadFile("basic.chq")
+
+	serv := NewServer()
+	err = serv.Router.ApplyConfig(string(cfgdat))
+	Check(err)
+
+	err = serv.Start()
+	Check(err)
+
 	// fname := flag.String("if", "", "input file")
 
 	// addr := flag.String("a", "", "input multicast/unicast address")
 	// port := flag.Int("p", 0, "input UDP port")
-	flag.Parse()
+	// flag.Parse()
 
-	rtr := NewRouter()
-	cfgdat, _ := ioutil.ReadFile("basic.chq")
-	err := rtr.ApplyConfig(string(cfgdat))
-	Check(err)
-
-	out := make(chan TsPacket)
-
-	n := rtr.Nodes["t"]
-	n.RegisterListener(out)
-
-	for _ = range out {
-	}
-	for nn, np := range rtr.Nodes {
-		j, err := np.ToJson()
-		log.Printf("node: %s\n json: %s\n err: %v\n", nn, j, err)
-
-	}
-	// fin, err := NewFileInput(*fname)
-	// pdr, err := NewPidDropper(17)
-	// pdq, err := NewPidDropper(0)
-	// op, err := NewNetInput(*addr, *port)
-
-	// rtr.RegisterNode("filein", fin)
-	// rtr.RegisterNode("pidrup", pdq)
-	// rtr.RegisterNode("pidrop", pdr)
-
+	// rtr := NewRouter()
+	// cfgdat, _ := ioutil.ReadFile("basic.chq")
+	// err := rtr.ApplyConfig(string(cfgdat))
 	// Check(err)
-	// inp := make(chan TsPacket)
-	// rtr.Connect("filein", "pidrup")
-	// rtr.Connect("pidrup", "pidrop")
 
-	// rtr.Disconnect("filein", "pidrup")
-	// pdr.RegisterListener(inp)
+	// out := make(chan TsPacket)
 
-	// pids := make(map[Pid]int)
+	// n := rtr.Nodes["t"]
+	// n.RegisterListener(out)
 
-	// for pkt := range inp {
-	// 	pids[pkt.Header.Pid]++
-	// 	if pkt.AdaptationField.Length > 0 {
-	// 		log.Printf("%v", pkt.AdaptationField.Length)
-	// 	}
+	// for _ = range out {
 	// }
-	// log.Printf("%v", pids)
-	// pkt = <-inp
-	// log.Printf("got: %v", pkt.Header.Pid)
-	// pkt = <-inp
-	// log.Printf("got: %v", pkt.Header.Pid)
-	// pkt = <-inp
-	// log.Printf("got: %v", pkt.Header.Pid)
+	// for nn, np := range rtr.Nodes {
+	// 	j, err := np.ToJson()
+	// 	log.Printf("node: %s\n json: %s\n err: %v\n", nn, j, err)
+	// }
 }

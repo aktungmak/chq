@@ -5,9 +5,9 @@ import (
 )
 
 type Routeable interface {
+	GetInputChan() chan TsPacket
 	RegisterListener(chan TsPacket)
 	UnRegisterListener(chan TsPacket)
-	GetInputChan() chan TsPacket
 	ToJson() ([]byte, error)
 }
 
