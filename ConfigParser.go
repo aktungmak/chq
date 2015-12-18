@@ -75,9 +75,6 @@ func (r *Router) NodeDecl(toks []string) error {
 		switch nodetype.In(i).Kind() {
 		case reflect.Bool:
 			val, err = strconv.ParseBool(toks[4+i])
-		case reflect.Int16:
-			val, err = strconv.ParseInt(toks[4+i], 10, 16)
-			val = int16(val.(int64))
 		case reflect.Int:
 			val, err = strconv.ParseInt(toks[4+i], 10, 32)
 			val = int(val.(int64))

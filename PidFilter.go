@@ -8,7 +8,7 @@ import (
 // all other PIDs will be rejected.
 // compare with PidDropper, which has the opposite behaviour
 type PidFilter struct {
-	Pid int16
+	Pid int
 	TsNode
 }
 
@@ -18,7 +18,7 @@ func init() {
 
 }
 
-func NewPidFilter(pid int16) (*PidFilter, error) {
+func NewPidFilter(pid int) (*PidFilter, error) {
 	node := &PidFilter{}
 	node.Pid = pid
 	node.input = make(chan TsPacket, CHAN_BUF_SIZE)

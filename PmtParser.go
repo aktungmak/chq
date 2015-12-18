@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
 )
 
@@ -13,7 +12,7 @@ import (
 type PmtParser struct {
 	PrevPmts []*Pmt
 	CurPmt   *Pmt
-	Pid      int16
+	Pid      int
 	TsNode
 }
 
@@ -22,7 +21,7 @@ func init() {
 	AvailableNodes.Register("PmtParser", NewPmtParser)
 }
 
-func NewPmtParser(pid int16) (*PmtParser, error) {
+func NewPmtParser(pid int) (*PmtParser, error) {
 	node := &PmtParser{}
 	node.input = make(chan TsPacket, CHAN_BUF_SIZE)
 
@@ -40,6 +39,9 @@ func (node *PmtParser) process() {
 	bufLen := 0
 	for pkt := range node.input {
 		node.PktsIn++
+		node.PktsOut++
+		node.output.Send(pkt)
+
 		if pkt.Header.Pid == node.Pid {
 			if pkt.Header.Pusi {
 				ptr := int(pkt.Payload[0])
@@ -79,16 +81,10 @@ func (node *PmtParser) process() {
 			}
 
 		}
-		node.PktsOut++
-		node.output.Send(pkt)
 	}
 }
 
 func (node *PmtParser) closeDown() {
 	log.Print("closing down PmtParser")
 	node.output.Close()
-}
-
-func (node *PmtParser) ToJson() ([]byte, error) {
-	return json.Marshal(node)
 }

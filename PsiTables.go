@@ -24,8 +24,8 @@ type Pat struct {
 }
 
 type pgm struct {
-	Pn    int   `json:"program_number"`
-	Pmpid int16 `json:"program_map_PID"`
+	Pn    int `json:"program_number"`
+	Pmpid int `json:"program_map_PID"`
 }
 
 // parses raw section data and returns a ptr to a Pat
@@ -52,7 +52,7 @@ func NewPat(data []byte) (*Pat, error) {
 	i := 8
 	for ; i < pat.Sl-4; i += 4 {
 		pn := (int(data[i]) << 8) + int(data[i+1])
-		pid := ((int16(data[i+2]) & 31) << 8) + int16(data[i+3])
+		pid := ((int(data[i+2]) & 31) << 8) + int(data[i+3])
 		pat.Pgms = append(pat.Pgms, pgm{pn, pid})
 	}
 
@@ -68,24 +68,24 @@ func NewPat(data []byte) (*Pat, error) {
 // Represents a Programme Map Table
 // See ISO 13818-1 table 2-28
 type Pmt struct {
-	Tid         byte  `json:"table_id"`
-	Ssi         bool  `json:"section_syntax_indicator"`
-	Sl          int   `json:"section_length"`
-	Pn          int   `json:"program_number"`
-	Vn          int   `json:"version_number"`
-	Cni         bool  `json:"current_next_indicator"`
-	Sn          byte  `json:"section_number"`
-	Lsn         byte  `json:"last_section_number"`
-	Pcrpid      int16 `json:"PCR_PID"`
-	Pil         int   `json:"program_info_length"`
+	Tid         byte `json:"table_id"`
+	Ssi         bool `json:"section_syntax_indicator"`
+	Sl          int  `json:"section_length"`
+	Pn          int  `json:"program_number"`
+	Vn          int  `json:"version_number"`
+	Cni         bool `json:"current_next_indicator"`
+	Sn          byte `json:"section_number"`
+	Lsn         byte `json:"last_section_number"`
+	Pcrpid      int  `json:"PCR_PID"`
+	Pil         int  `json:"program_info_length"`
 	Descriptors []descriptor
 	Pels        []pel
 	Crc         uint32 `json:"CRC_32"`
 }
 type pel struct {
-	St          byte  `json:"stream_type"`
-	Pid         int16 `json:"elementary_PID"`
-	Eil         int   `json:"ES_info_length"`
+	St          byte `json:"stream_type"`
+	Pid         int  `json:"elementary_PID"`
+	Eil         int  `json:"ES_info_length"`
 	Descriptors []descriptor
 }
 
@@ -109,7 +109,7 @@ func NewPmt(data []byte) (*Pmt, error) {
 	pmt.Cni = data[5]&1 != 0
 	pmt.Sn = data[6]
 	pmt.Lsn = data[7]
-	pmt.Pcrpid = ((int16(data[8]) & 31) << 8) + int16(data[9])
+	pmt.Pcrpid = ((int(data[8]) & 31) << 8) + int(data[9])
 	pmt.Pil = ((int(data[10]) & 15) << 8) + int(data[11])
 
 	if len(data) < pmt.Sl+3 {
@@ -122,7 +122,7 @@ func NewPmt(data []byte) (*Pmt, error) {
 
 	for i < pmt.Sl-4 {
 		st := data[i]
-		pid := ((int16(data[i+1]) & 31) << 8) + int16(data[i+2])
+		pid := ((int(data[i+1]) & 31) << 8) + int(data[i+2])
 		eil := ((int(data[i+3]) & 15) << 8) + int(data[i+4])
 		pmt.Pels = append(pmt.Pels, pel{st, pid, eil, nil})
 

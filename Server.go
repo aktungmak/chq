@@ -30,10 +30,6 @@ func marshal(v interface{}) ([]byte, error) {
 	}
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hi there, got %s", r.URL.Path[1:])
-}
-
 func (s *Server) summary(w http.ResponseWriter, r *http.Request) {
 	dat, err := marshal(s.Router.Nodes)
 	if err != nil {
@@ -77,7 +73,7 @@ func (s *Server) types(w http.ResponseWriter, r *http.Request) {
 // start a server serving. blocks until err or exit
 func (s *Server) Start() error {
 	var handlers = map[string]func(http.ResponseWriter, *http.Request){
-		"/":        handler,
+		"/":        s.summary,
 		"/summary": s.summary,
 		"/nodes/":  s.nodes,
 		"/types":   s.types,

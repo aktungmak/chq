@@ -2,12 +2,17 @@
 # node cc ::= CcCommenter
 # node o ::= CommentWriter log.txt
 
-node f ::= FileInput mpts.ts
-node p ::= PidFilter 0
-node t ::= PatParser 0
-node m ::= PmtParser 66
+# node f ::= FileInput mpts.ts
+node inp  ::= NetInput 127.0.01 2000
+node pat  ::= PatParser 0
+node pmt1 ::= PmtParser 16
+node pmt2 ::= PmtParser 256
+node ctr  ::= PidCounter
 
-conn f ->     t -> m
+conn inp -> pat
+conn inp -> ctr
+conn inp -> pmt1
+conn inp -> pmt2
 
 #conn f -> p -> c -> o
 #conn f -> p

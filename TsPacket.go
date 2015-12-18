@@ -27,14 +27,14 @@ func NewTsPacket(data []byte) TsPacket {
 // Represents the 4-byte transport stream packet header
 // See ISO 13818-1 Table 2-2
 type TsPacketHeader struct {
-	SyncByte byte  `json:"sync_byte"`
-	Tei      bool  `json:"transport_error_indicator"`
-	Pusi     bool  `json:"payload_unit_start_indicator"`
-	Tp       bool  `json:"transport_priority"`
-	Pid      int16 `json:"PID"`
-	Tsc      byte  `json:"transport_scrambling_control"`
-	Afc      byte  `json:"adaptation_field_control"`
-	Cc       byte  `json:"continuity_counter"`
+	SyncByte byte `json:"sync_byte"`
+	Tei      bool `json:"transport_error_indicator"`
+	Pusi     bool `json:"payload_unit_start_indicator"`
+	Tp       bool `json:"transport_priority"`
+	Pid      int  `json:"PID"`
+	Tsc      byte `json:"transport_scrambling_control"`
+	Afc      byte `json:"adaptation_field_control"`
+	Cc       byte `json:"continuity_counter"`
 }
 
 // Constructor to create a new TS header struct
@@ -45,7 +45,7 @@ func NewTsPacketHeader(data []byte) *TsPacketHeader {
 		Tei:      data[1]&128 != 0,
 		Pusi:     data[1]&64 != 0,
 		Tp:       data[1]&32 != 0,
-		Pid:      ((int16(data[1]) & 31) << 8) + int16(data[2]),
+		Pid:      ((int(data[1]) & 31) << 8) + int(data[2]),
 		Tsc:      (data[3] & 192) >> 6,
 		Afc:      (data[3] & 48) >> 4,
 		Cc:       data[3] & 15,
@@ -81,8 +81,8 @@ type AdaptationField struct {
 	Pwrf bool `json:"piecewise_rate_flag"`
 	Ssf  bool `json:"seamless_splice_flag"`
 	//if `json:"ltw_flag` == "1
-	Ltwvf bool  `json:"ltw_valid_flag"`
-	Ltwo  int16 `json:"ltw_offset"`
+	Ltwvf bool `json:"ltw_valid_flag"`
+	Ltwo  int  `json:"ltw_offset"`
 	//if `json:"piecewise_rate_flag` == "1
 	Pwr int `json:"piecewise_rate"`
 	//if `json:"seamless_splice_flag` == "1

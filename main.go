@@ -42,7 +42,7 @@ func main() {
 	// for _ = range out {
 	// }
 	// for nn, np := range rtr.Nodes {
-	// 	j, err := np.ToJson()
+	// 	j, err := np.MarshalJSON()
 	// 	log.Printf("node: %s\n json: %s\n err: %v\n", nn, j, err)
 	// }
 }

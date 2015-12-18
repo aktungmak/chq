@@ -26,7 +26,7 @@ func TestNewScte35SpliceInfo(t *testing.T) {
 		t.Errorf("Section Syntax Indicator should be false, got %t", sis.Ssi)
 	}
 	if sis.Pi != false {
-		t.Errorf("Private Indicator should be false, got %t", sis.Sl)
+		t.Errorf("Private Indicator should be false, got %d", sis.Sl)
 	}
 	if sis.Sl != 0x20 {
 		t.Errorf("Section Length should be 0x20, got %x", sis.Sl)

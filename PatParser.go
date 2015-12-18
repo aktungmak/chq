@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
 )
 
@@ -13,7 +12,7 @@ import (
 type PatParser struct {
 	PrevPats []*Pat
 	CurPat   *Pat
-	Pid      int16
+	Pid      int
 	TsNode
 }
 
@@ -22,7 +21,7 @@ func init() {
 	AvailableNodes.Register("PatParser", NewPatParser)
 }
 
-func NewPatParser(pid int16) (*PatParser, error) {
+func NewPatParser(pid int) (*PatParser, error) {
 	node := &PatParser{}
 	node.input = make(chan TsPacket, CHAN_BUF_SIZE)
 
@@ -40,6 +39,8 @@ func (node *PatParser) process() {
 	bufLen := 0
 	for pkt := range node.input {
 		node.PktsIn++
+		node.PktsOut++
+		node.output.Send(pkt)
 		if pkt.Header.Pid == node.Pid {
 			if pkt.Header.Pusi { //yes pusi DONE
 				ptr := int(pkt.Payload[0])
@@ -79,16 +80,10 @@ func (node *PatParser) process() {
 			}
 
 		}
-		node.PktsOut++
-		node.output.Send(pkt)
 	}
 }
 
 func (node *PatParser) closeDown() {
 	log.Print("closing down PatParser")
 	node.output.Close()
-}
-
-func (node *PatParser) ToJson() ([]byte, error) {
-	return json.Marshal(node)
 }

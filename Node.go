@@ -1,9 +1,5 @@
 package main
 
-import (
-	"encoding/json"
-)
-
 // TsNode is the core of every node. It provides the
 // inputs and outputs used by every type of node, and
 // defines the methods specified by Routeable. It is
@@ -35,6 +31,6 @@ func (node *TsNode) UnRegisterListener(toremove chan TsPacket) {
 // this could be used by a web interface etc to monitor the status
 // of each node. This method may be hidden by a struct which embeds
 // TsNode, in which case that struct will also dump its own data too.
-func (node *TsNode) ToJson() ([]byte, error) {
-	return json.Marshal(node)
-}
+// func (node *TsNode) MarshalJSON() ([]byte, error) {
+// 	return json.Marshal(node)
+// }

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
 	"net"
 )
@@ -44,10 +43,6 @@ func NewNetInput(address string, port int) (*NetInput, error) {
 	return n, nil
 }
 
-func (node *NetInput) ToJson() ([]byte, error) {
-	return json.Marshal(node)
-}
-
 func (node *NetInput) process() {
 	defer node.closeDown()
 	var packetsize int
@@ -59,7 +54,7 @@ func (node *NetInput) process() {
 			log.Printf("TS capture error: %s", err)
 			continue
 		}
-		log.Printf("got %d bytes", n)
+		// log.Printf("got %d bytes", n)
 		if (packet[0] & 192) == 128 {
 			// this is RTP, skip the header
 			m += 12 + (4 * (int(packet[0]) & 15))
@@ -74,7 +69,7 @@ func (node *NetInput) process() {
 		} else {
 			panic("Unknown TS packet size!!")
 		}
-		log.Printf("packetsize is %d bytes", packetsize)
+		// log.Printf("packetsize is %d bytes", packetsize)
 		// split into TS packets
 		for i := m; i < n; i += packetsize {
 			pkt := NewTsPacket(packet[i : i+packetsize])
