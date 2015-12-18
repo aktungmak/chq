@@ -46,14 +46,19 @@ func TestNewScte35SpliceInfo(t *testing.T) {
 	if sis.Cwi != 0x0 {
 		t.Errorf("CW index should be 0x0, got %x", sis.Cwi)
 	}
-	if sis.Tier != 0x0 {
-		t.Errorf("Tier should be 0x0, got %x", sis.Tier)
+	if sis.Tier != 0xfff {
+		t.Errorf("Tier should be 0xfff, got %x", sis.Tier)
 	}
 	if sis.Scl != 0xfff {
 		t.Errorf("Splice Command len should be 0xfff, got %x", sis.Scl)
 	}
 	if sis.Sct != 0x5 {
 		t.Errorf("Splice Command type should be 0x5, got %x", sis.Sct)
+	}
+
+	// splice insert command
+	if sis.scte35SpliceInsert == nil {
+		t.Fatal("Splice insert field has not been populated!")
 	}
 
 	// ensure CRC was copied correctly
