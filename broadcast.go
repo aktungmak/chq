@@ -1,20 +1,16 @@
 package main
 
-import "sync"
+import (
+	"sync"
+)
 
 // Broadcaster implements a broadcast channel.
-// The zero value is a usable unbuffered channel.
+// The zero value is a usable channel.
 type Broadcaster struct {
 	m         sync.Mutex
 	listeners map[int]chan<- TsPacket // lazy init
 	nextId    int
-	capacity  int
 	closed    bool
-}
-
-// New returns a new Broadcaster with the given capacity (0 means unbuffered).
-func New(n int) *Broadcaster {
-	return &Broadcaster{capacity: n}
 }
 
 // Send broadcasts a message to the channel.

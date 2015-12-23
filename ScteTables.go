@@ -166,7 +166,7 @@ func newScte35SpliceInsert(data []byte) (*scte35SpliceInsert, error) {
 	if si.Psf {
 		si.Cc = int(data[i])
 		cs := make([]*elementaryPidData, 0)
-		for j := 0; j < si.CC; j++ {
+		for j := 0; j < si.Cc; j++ {
 			epd := &elementaryPidData{}
 			epd.Ct = data[i]
 			i += 1
@@ -182,6 +182,7 @@ func newScte35SpliceInsert(data []byte) (*scte35SpliceInsert, error) {
 		if err != nil {
 			return si, err
 		}
+		si.breakDuration = bd
 		i += 5
 	}
 

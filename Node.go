@@ -9,6 +9,7 @@ type TsNode struct {
 	output  Broadcaster
 	PktsIn  int64 //counters
 	PktsOut int64
+	active  bool
 }
 
 // accessor to get this node's input channel
@@ -27,10 +28,10 @@ func (node *TsNode) UnRegisterListener(toremove chan TsPacket) {
 	node.output.UnRegisterChan(toremove)
 }
 
-// dump a representation of this node to JSON
-// this could be used by a web interface etc to monitor the status
-// of each node. This method may be hidden by a struct which embeds
-// TsNode, in which case that struct will also dump its own data too.
-// func (node *TsNode) MarshalJSON() ([]byte, error) {
-// 	return json.Marshal(node)
-// }
+// Switch a node between being active/inactive states
+// not all nodes used this, but it is a good idea for
+// sources to use this so they don't start streaming
+// before downstream is ready.
+func (node *TsNode) Toggle() {
+	node.active = !node.active
+}

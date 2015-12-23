@@ -36,11 +36,13 @@ func NewCommentWriter(fname string) (*CommentWriter, error) {
 func (node *CommentWriter) process() {
 	defer node.closeDown()
 	for pkt := range node.input {
+		node.PktsIn++
+		node.output.Send(pkt)
+		node.PktsOut++
+
 		if pkt.Comment != "" {
 			node.file.WriteString(pkt.Comment + "\n")
 		}
-		node.PktsOut++
-		node.output.Send(pkt)
 	}
 }
 

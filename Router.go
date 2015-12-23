@@ -8,7 +8,7 @@ type Routeable interface {
 	GetInputChan() chan TsPacket
 	RegisterListener(chan TsPacket)
 	UnRegisterListener(chan TsPacket)
-	// json.Marshaler
+	Toggle()
 }
 
 type Router struct {

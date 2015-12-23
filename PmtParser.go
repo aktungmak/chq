@@ -39,8 +39,8 @@ func (node *PmtParser) process() {
 	bufLen := 0
 	for pkt := range node.input {
 		node.PktsIn++
-		node.PktsOut++
 		node.output.Send(pkt)
+		node.PktsOut++
 
 		if pkt.Header.Pid == node.Pid {
 			if pkt.Header.Pusi {
@@ -85,6 +85,6 @@ func (node *PmtParser) process() {
 }
 
 func (node *PmtParser) closeDown() {
-	log.Print("closing down PmtParser")
+	log.Printf("closing down PmtParser for pid %d", node.Pid)
 	node.output.Close()
 }

@@ -11,7 +11,7 @@ import (
 // Comment field of the TSPacket struct.
 // It passes through all packets received.
 type CcCommenter struct {
-	CurCc map[int]int
+	curCc map[int]byte
 	TsNode
 }
 
@@ -22,7 +22,7 @@ func init() {
 
 func NewCcCommenter() (*CcCommenter, error) {
 	node := &CcCommenter{}
-	node.CurCc = make(map[int]int)
+	node.curCc = make(map[int]byte)
 	node.input = make(chan TsPacket, CHAN_BUF_SIZE)
 
 	go node.process()
@@ -33,21 +33,22 @@ func (node *CcCommenter) process() {
 	defer node.closeDown()
 	for pkt := range node.input {
 		node.PktsIn++
-		node.PktsOut++
 		node.output.Send(pkt)
+		node.PktsOut++
 		// filter out NULL pid and erroneous values
 		if pkt.Header.Pid < 0x1FF {
-			prev, ok := node.CurCc[pkt.Header.Pid]
-			node.CurCc[pkt.Header.Pid] = pkt.Header.Cc
+			prev, ok := node.curCc[pkt.Header.Pid]
+			node.curCc[pkt.Header.Pid] = pkt.Header.Cc
 
 			// have we seen this one before?
 			if ok {
 				if pkt.Header.Cc != ((prev + 1) % 16) {
 					// no need to inc if no payld
 					if pkt.Header.Afc&1 == 1 {
-						pkt.Comment = fmt.Sprintf("CC error: expected %d got %d",
+						pkt.Comment = fmt.Sprintf("CC error: expected %d got %d (packet %d)",
 							prev+1,
-							pkt.Header.Cc)
+							pkt.Header.Cc,
+							node.PktsIn)
 					}
 				}
 			}

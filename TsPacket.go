@@ -8,6 +8,7 @@ type TsPacket struct {
 	AdaptationField *AdaptationField `json:"adaptation_field"`
 	Payload         []byte           `json:"data_byte"`
 	Comment         string           // can be used for logging, don't use newlines
+	bytes           []byte           // the raw packet bytes
 }
 
 func NewTsPacket(data []byte) TsPacket {
@@ -16,11 +17,13 @@ func NewTsPacket(data []byte) TsPacket {
 	// copy the data, don't reuse the backing array
 	// otherwise you will get a race!
 	payld := append([]byte(nil), data[4+af.Length:]...)
+	bytes := append([]byte(nil), data...)
 
 	return TsPacket{
 		Header:          hdr,
 		AdaptationField: af,
 		Payload:         payld,
+		bytes:           bytes,
 	}
 }
 
@@ -80,12 +83,12 @@ type AdaptationField struct {
 	Ltwf bool `json:"ltw_flag"`
 	Pwrf bool `json:"piecewise_rate_flag"`
 	Ssf  bool `json:"seamless_splice_flag"`
-	//if `json:"ltw_flag` == "1
+	//if ltw_flag == 1
 	Ltwvf bool `json:"ltw_valid_flag"`
 	Ltwo  int  `json:"ltw_offset"`
-	//if `json:"piecewise_rate_flag` == "1
+	//if piecewise_rate_flag == 1
 	Pwr int `json:"piecewise_rate"`
-	//if `json:"seamless_splice_flag` == "1
+	//if seamless_splice_flag == 1
 	St  int   `json:"splice_type"`
 	Dna int64 `json:"DTS_next_AU"`
 }
@@ -156,7 +159,6 @@ func NewAdaptationField(data []byte) *AdaptationField {
 		af.Ssf = data[ofs]&32 != 0
 		ofs += 1
 		// TODO add the extension fields
-
 	}
 	return &af
 }

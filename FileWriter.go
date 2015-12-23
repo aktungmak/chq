@@ -35,16 +35,11 @@ func NewFileWriter(fname string) (*FileWriter, error) {
 
 func (node *FileWriter) process() {
 	defer node.closeDown()
-	prev := 0
 	for pkt := range node.input {
 		node.PktsIn++
-		node.PktsOut++
 		node.output.Send(pkt)
+		node.PktsOut++
 
-		if pkt.seq != prev+1 {
-			log.Printf("seq wrong %d %d", pkt.seq, prev)
-		}
-		prev = pkt.seq
 		node.file.Write(pkt.bytes)
 	}
 }

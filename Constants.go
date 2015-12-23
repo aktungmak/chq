@@ -5,15 +5,14 @@ import (
 )
 
 const (
-	CHAN_BUF_SIZE   = 10
+	CHAN_BUF_SIZE   = 1
 	TS_PKT_SIZE     = 188
 	FILE_CHUNK_SIZE = 500 //number of packets to read at a time
-	PAT_PID         = 0
 )
 
 type AvailableNodeMap map[string]interface{}
 
-// TODO convert all nodes to use this method
+// all nodes must use use this method to make themselves available
 func (a AvailableNodeMap) Register(name string, node interface{}) {
 	_, exist := a[name]
 	if exist {
