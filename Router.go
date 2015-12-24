@@ -57,3 +57,12 @@ func (r *Router) Disconnect(src, dst string) error {
 	sn.UnRegisterListener(dn.GetInputChan())
 	return nil
 }
+
+// trigger all nodes in the router. should be
+// used after ApplyConfig is complete to start
+// all nodes processing.
+func (r *Router) ToggleAll() {
+	for _, node := range r.Nodes {
+		node.Toggle()
+	}
+}

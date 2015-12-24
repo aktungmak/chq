@@ -19,7 +19,7 @@ func main() {
 	serv := NewServer()
 	err = serv.Router.ApplyConfig(string(cfgdat))
 	Check(err)
-	serv.Router.Nodes["inp"].(*FileInput).start()
+	serv.Router.ToggleAll()
 
 	err = serv.Start()
 	Check(err)

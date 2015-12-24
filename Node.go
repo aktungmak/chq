@@ -1,5 +1,10 @@
 package main
 
+import (
+	"log"
+	"sync"
+)
+
 // TsNode is the core of every node. It provides the
 // inputs and outputs used by every type of node, and
 // defines the methods specified by Routeable. It is
@@ -9,7 +14,10 @@ type TsNode struct {
 	output  Broadcaster
 	PktsIn  int64 //counters
 	PktsOut int64
-	active  bool
+	Control struct {
+		Active bool
+		sync.WaitGroup
+	}
 }
 
 // accessor to get this node's input channel
@@ -30,8 +38,15 @@ func (node *TsNode) UnRegisterListener(toremove chan TsPacket) {
 
 // Switch a node between being active/inactive states
 // not all nodes used this, but it is a good idea for
-// sources to use this so they don't start streaming
+// sources to use this so they don't start outputting
 // before downstream is ready.
 func (node *TsNode) Toggle() {
-	node.active = !node.active
+	log.Print("Togggggle!")
+	if node.Control.Active {
+		node.Control.Active = false
+		node.Control.Add(1)
+	} else {
+		node.Control.Active = true
+		node.Control.Done()
+	}
 }
