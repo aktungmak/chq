@@ -31,8 +31,7 @@ func (node *PidCounter) process() {
 	defer node.closeDown()
 	for pkt := range node.input {
 		node.PktsIn++
-		node.PktsOut++
-		node.output.Send(pkt)
+		node.Send(pkt)
 
 		node.Pids[pkt.Header.Pid]++
 	}

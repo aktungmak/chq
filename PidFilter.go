@@ -7,6 +7,7 @@ import (
 // A PidFilter allows only the specified PID to pass
 // all other PIDs will be rejected.
 // compare with PidDropper, which has the opposite behaviour
+// TODO allow multiple PIDs
 type PidFilter struct {
 	Pid int
 	TsNode
@@ -30,9 +31,9 @@ func NewPidFilter(pid int) (*PidFilter, error) {
 func (node *PidFilter) process() {
 	defer node.closeDown()
 	for pkt := range node.input {
+		node.PktsIn++
 		if pkt.Header.Pid == node.Pid {
-			node.PktsOut++
-			node.output.Send(pkt)
+			node.Send(pkt)
 		}
 	}
 }

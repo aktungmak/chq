@@ -37,8 +37,7 @@ func (node *CommentWriter) process() {
 	defer node.closeDown()
 	for pkt := range node.input {
 		node.PktsIn++
-		node.output.Send(pkt)
-		node.PktsOut++
+		node.Send(pkt)
 
 		if pkt.Comment != "" {
 			node.file.WriteString(pkt.Comment + "\n")

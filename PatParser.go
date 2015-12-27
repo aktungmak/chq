@@ -39,8 +39,7 @@ func (node *PatParser) process() {
 	bufLen := 0
 	for pkt := range node.input {
 		node.PktsIn++
-		node.PktsOut++
-		node.output.Send(pkt)
+		node.Send(pkt)
 		if pkt.Header.Pid == node.Pid {
 			if pkt.Header.Pusi { //yes pusi DONE
 				ptr := int(pkt.Payload[0])

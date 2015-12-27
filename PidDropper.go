@@ -29,9 +29,9 @@ func NewPidDropper(pid int) (*PidDropper, error) {
 func (node *PidDropper) process() {
 	defer node.closeDown()
 	for pkt := range node.input {
+		node.PktsIn++
 		if pkt.Header.Pid != node.Pid {
-			node.PktsOut++
-			node.output.Send(pkt)
+			node.Send(pkt)
 		}
 	}
 }

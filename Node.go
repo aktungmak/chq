@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 	"sync"
 )
@@ -12,11 +13,11 @@ import (
 type TsNode struct {
 	input   chan TsPacket
 	output  Broadcaster
-	PktsIn  int64 //counters
+	PktsIn  int64
 	PktsOut int64
-	Control struct {
-		Active bool
-		sync.WaitGroup
+	control struct {
+		active bool
+		c      sync.Cond
 	}
 }
 
@@ -36,17 +37,35 @@ func (node *TsNode) UnRegisterListener(toremove chan TsPacket) {
 	node.output.UnRegisterChan(toremove)
 }
 
+// send the provided packet using our output
+// broadcaster. if we are not active, wait for
+// the signal. increments counters appropriately.
+func (node *TsNode) Send(pkt TsPacket) {
+	for !node.control.active {
+		node.control.c.Wait()
+	}
+	node.output.Send(pkt)
+	node.PktsOut++
+}
+
 // Switch a node between being active/inactive states
 // not all nodes used this, but it is a good idea for
 // sources to use this so they don't start outputting
 // before downstream is ready.
 func (node *TsNode) Toggle() {
 	log.Print("Togggggle!")
-	if node.Control.Active {
-		node.Control.Active = false
-		node.Control.Add(1)
-	} else {
-		node.Control.Active = true
-		node.Control.Done()
-	}
+	node.control.active = !node.control.active
+	node.control.c.Signal()
+}
+
+func (node *TsNode) MarshalJSON() ([]byte, error) {
+	return json.Marshal(struct {
+		PktsIn  int64
+		PktsOut int64
+		Active  bool
+	}{
+		node.PktsIn,
+		node.PktsOut,
+		node.control.active,
+	})
 }

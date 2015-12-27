@@ -37,8 +37,7 @@ func (node *FileWriter) process() {
 	defer node.closeDown()
 	for pkt := range node.input {
 		node.PktsIn++
-		node.output.Send(pkt)
-		node.PktsOut++
+		node.Send(pkt)
 
 		node.file.Write(pkt.bytes)
 	}

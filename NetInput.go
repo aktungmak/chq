@@ -74,9 +74,7 @@ func (node *NetInput) process() {
 		for i := m; i < n; i += packetsize {
 			pkt := NewTsPacket(packet[i : i+packetsize])
 			node.PktsIn++
-			// todo pause if we are in inactive state
-			node.output.Send(pkt)
-			node.PktsOut++
+			node.Send(pkt)
 		}
 	}
 }

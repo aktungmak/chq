@@ -33,8 +33,7 @@ func (node *CcCommenter) process() {
 	defer node.closeDown()
 	for pkt := range node.input {
 		node.PktsIn++
-		node.output.Send(pkt)
-		node.PktsOut++
+		node.Send(pkt)
 		// filter out NULL pid and erroneous values
 		if pkt.Header.Pid < 0x1FF {
 			prev, ok := node.curCc[pkt.Header.Pid]

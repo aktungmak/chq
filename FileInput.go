@@ -27,7 +27,6 @@ func NewFileInput(fname string) (*FileInput, error) {
 	node := &FileInput{}
 	node.file = fh
 	node.input = nil
-	node.Control.Add(1)
 
 	go node.process()
 	return node, nil
@@ -56,10 +55,7 @@ func (node *FileInput) process() {
 			pkt := NewTsPacket(buf[i : i+TS_PKT_SIZE])
 
 			node.PktsIn++
-			// pause if we are not active
-			node.Control.Wait()
-			node.output.Send(pkt)
-			node.PktsOut++
+			node.Send(pkt)
 		}
 	}
 }

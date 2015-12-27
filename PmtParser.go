@@ -39,8 +39,7 @@ func (node *PmtParser) process() {
 	bufLen := 0
 	for pkt := range node.input {
 		node.PktsIn++
-		node.output.Send(pkt)
-		node.PktsOut++
+		node.Send(pkt)
 
 		if pkt.Header.Pid == node.Pid {
 			if pkt.Header.Pusi {
