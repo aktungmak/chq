@@ -1,8 +1,6 @@
 package main
 
 import (
-	"encoding/json"
-	"log"
 	"sync"
 )
 
@@ -15,10 +13,11 @@ type TsNode struct {
 	output  Broadcaster
 	PktsIn  int64
 	PktsOut int64
-	control struct {
-		active    bool
-		sync.Cond // .L is lazily initialized
-	}
+	// Active controls whether we are processing or not
+	Active bool
+	// this Cond syncs access to Active
+	// its .L field is lazily initialized
+	sync.Cond `json:"-"`
 }
 
 // accessor to get this node's input channel
@@ -37,16 +36,29 @@ func (node *TsNode) UnRegisterListener(toremove chan TsPacket) {
 	node.output.UnRegisterChan(toremove)
 }
 
+// list out all the currently available outputs
+func (node *TsNode) GetOutputs() []chan TsPacket {
+	// todo this should probably implemented in Broadcaster
+	node.output.m.Lock()
+	defer node.output.m.Unlock()
+
+	ret := make([]chan TsPacket, 0)
+	for _, ch := range node.output.listeners {
+		ret = append(ret, ch)
+	}
+	return ret
+}
+
 // send the provided packet using our output
 // broadcaster. if we are not active, wait for
 // the signal. increments counters appropriately.
 func (node *TsNode) Send(pkt TsPacket) {
-	if node.control.L == nil {
-		node.control.Cond = *sync.NewCond(&sync.Mutex{})
+	if node.L == nil {
+		node.Cond = *sync.NewCond(&sync.Mutex{})
 	}
-	for !node.control.active {
-		node.control.L.Lock()
-		node.control.Wait()
+	for !node.Active {
+		node.L.Lock()
+		node.Wait()
 	}
 	node.output.Send(pkt)
 	node.PktsOut++
@@ -57,24 +69,23 @@ func (node *TsNode) Send(pkt TsPacket) {
 // sources to use this so they don't start outputting
 // before downstream is ready.
 func (node *TsNode) Toggle() {
-	log.Print("Togggggle!")
-	if node.control.L == nil {
-		node.control.Cond = *sync.NewCond(&sync.Mutex{})
+	if node.L == nil {
+		node.Cond = *sync.NewCond(&sync.Mutex{})
 	}
-	node.control.L.Lock()
-	node.control.active = !node.control.active
-	node.control.L.Unlock()
-	node.control.Signal()
+	node.L.Lock()
+	node.Active = !node.Active
+	node.L.Unlock()
+	node.Signal()
 }
 
-func (node *TsNode) MarshalJSON() ([]byte, error) {
-	return json.Marshal(struct {
-		PktsIn  int64
-		PktsOut int64
-		Active  bool
-	}{
-		node.PktsIn,
-		node.PktsOut,
-		node.control.active,
-	})
-}
+// func (node *TsNode) MarshalJSON() ([]byte, error) {
+// 	return json.Marshal(struct {
+// 		PktsIn  int64
+// 		PktsOut int64
+// 		Active  bool
+// 	}{
+// 		node.PktsIn,
+// 		node.PktsOut,
+// 		node.active,
+// 	})
+// }

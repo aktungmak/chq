@@ -8,7 +8,7 @@ import (
 // The zero value is a usable channel.
 type Broadcaster struct {
 	m         sync.Mutex
-	listeners map[int]chan<- TsPacket // lazy init
+	listeners map[int]chan TsPacket // lazy init
 	nextId    int
 	closed    bool
 }
@@ -40,7 +40,7 @@ func (b *Broadcaster) RegisterChan(ch chan TsPacket) {
 	b.m.Lock()
 	defer b.m.Unlock()
 	if b.listeners == nil {
-		b.listeners = make(map[int]chan<- TsPacket)
+		b.listeners = make(map[int]chan TsPacket)
 	}
 	for b.listeners[b.nextId] != nil {
 		b.nextId++
@@ -54,7 +54,7 @@ func (b *Broadcaster) UnRegisterChan(ch chan TsPacket) {
 	b.m.Lock()
 	defer b.m.Unlock()
 	if b.listeners == nil {
-		b.listeners = make(map[int]chan<- TsPacket)
+		b.listeners = make(map[int]chan TsPacket)
 	}
 	for i, c := range b.listeners {
 		if c == ch {

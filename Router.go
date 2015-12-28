@@ -8,6 +8,7 @@ type Routeable interface {
 	GetInputChan() chan TsPacket
 	RegisterListener(chan TsPacket)
 	UnRegisterListener(chan TsPacket)
+	GetOutputs() []chan TsPacket
 	Toggle()
 }
 
