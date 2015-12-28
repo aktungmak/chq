@@ -16,8 +16,8 @@ type TsNode struct {
 	PktsIn  int64
 	PktsOut int64
 	control struct {
-		active bool
-		c      sync.Cond
+		active    bool
+		sync.Cond // .L is lazily initialized
 	}
 }
 
@@ -41,8 +41,12 @@ func (node *TsNode) UnRegisterListener(toremove chan TsPacket) {
 // broadcaster. if we are not active, wait for
 // the signal. increments counters appropriately.
 func (node *TsNode) Send(pkt TsPacket) {
+	if node.control.L == nil {
+		node.control.Cond = *sync.NewCond(&sync.Mutex{})
+	}
 	for !node.control.active {
-		node.control.c.Wait()
+		node.control.L.Lock()
+		node.control.Wait()
 	}
 	node.output.Send(pkt)
 	node.PktsOut++
@@ -54,8 +58,13 @@ func (node *TsNode) Send(pkt TsPacket) {
 // before downstream is ready.
 func (node *TsNode) Toggle() {
 	log.Print("Togggggle!")
+	if node.control.L == nil {
+		node.control.Cond = *sync.NewCond(&sync.Mutex{})
+	}
+	node.control.L.Lock()
 	node.control.active = !node.control.active
-	node.control.c.Signal()
+	node.control.L.Unlock()
+	node.control.Signal()
 }
 
 func (node *TsNode) MarshalJSON() ([]byte, error) {
