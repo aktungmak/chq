@@ -69,7 +69,6 @@ func TestPidRemapper(t *testing.T) {
 	if ((int(opkt.bytes[1])&31)<<8)+int(opkt.bytes[2]) != 202 {
 		t.Errorf("pid in opkt.bytes is incorrect")
 	}
-
 }
 
 func BenchmarkPidRemapper(b *testing.B) {

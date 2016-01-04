@@ -65,9 +65,7 @@ func (node *TsNode) Send(pkt TsPacket) {
 }
 
 // Switch a node between being active/inactive states
-// not all nodes used this, but it is a good idea for
-// sources to use this so they don't start outputting
-// before downstream is ready.
+// The Send() method will block until node.Active == true
 func (node *TsNode) Toggle() {
 	if node.L == nil {
 		node.Cond = *sync.NewCond(&sync.Mutex{})
@@ -77,15 +75,3 @@ func (node *TsNode) Toggle() {
 	node.L.Unlock()
 	node.Signal()
 }
-
-// func (node *TsNode) MarshalJSON() ([]byte, error) {
-// 	return json.Marshal(struct {
-// 		PktsIn  int64
-// 		PktsOut int64
-// 		Active  bool
-// 	}{
-// 		node.PktsIn,
-// 		node.PktsOut,
-// 		node.active,
-// 	})
-// }
