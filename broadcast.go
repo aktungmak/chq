@@ -63,3 +63,13 @@ func (b *Broadcaster) UnRegisterChan(ch chan TsPacket) {
 		}
 	}
 }
+
+func (b *Broadcaster) GetOutputs() []chan TsPacket {
+	b.m.Lock()
+	defer b.m.Unlock()
+	ret := make([]chan TsPacket, 0, len(b.listeners))
+	for _, ch := range b.listeners {
+		ret = append(ret, ch)
+	}
+	return ret
+}

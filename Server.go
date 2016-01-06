@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -43,16 +43,16 @@ func (s *Server) summary(w http.ResponseWriter, r *http.Request) {
 // return the info on a particular node, specified by name
 func (s *Server) nodes(w http.ResponseWriter, r *http.Request) {
 	name := r.URL.Path[len("/nodes/"):]
-	v, ok := s.Router.Nodes[name]
-	if ok {
+	v, err := s.Router.GetNodeByName(name)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+	} else {
 		dat, err := marshal(v)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		} else {
 			w.Write(dat)
 		}
-	} else {
-		http.Error(w, "node not found!", http.StatusNotFound)
 	}
 }
 
@@ -78,34 +78,48 @@ func (s *Server) types(w http.ResponseWriter, r *http.Request) {
 // TODO add DELETE to disconnect
 func (s *Server) conn(w http.ResponseWriter, r *http.Request) {
 	name := r.URL.Path[len("/conn/"):]
-	node, ok := s.Router.Nodes[name]
-	if !ok {
+	node, err := s.Router.GetNodeByName(name)
+	if err != nil {
 		http.Error(w, "node not found!", http.StatusNotFound)
-	}
-	switch r.Method {
+	} else {
 
-	case "GET":
-		res := make([]string, 0)
-		outs := node.GetOutputs()
-		for n, a := range s.Router.Nodes {
-			for _, b := range outs {
-				if a.GetInputChan() == b {
-					res = append(res, n)
+		switch r.Method {
+
+		case "GET":
+			res := make([]string, 0)
+			outs := node.GetOutputs()
+			for n, a := range s.Router.Nodes {
+				for _, b := range outs {
+					if a.GetInputChan() == b {
+						res = append(res, n)
+					}
 				}
 			}
-		}
-		dat, err := marshal(res)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		} else {
-			w.Write(dat)
-			return
-		}
+			dat, err := marshal(res)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			} else {
+				w.Write(dat)
+				return
+			}
 
-	case "POST":
-		// TODO implement making a new connection
-	default:
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		case "POST":
+			// expect string with name of target
+			buf, err := ioutil.ReadAll(r.Body)
+			tgt := string(buf)
+			err = s.Router.Connect(name, tgt)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+		case "DELETE":
+			// TODO implement deleting a connection
+			fallthrough
+		default:
+			http.Error(w, "", http.StatusMethodNotAllowed)
+		}
 	}
 }
 
@@ -127,7 +141,6 @@ func (s *Server) Start() error {
 	for ep, h := range handlers {
 		http.HandleFunc(ep, h)
 	}
-	fmt.Printf("%v", s.Router)
 	http.ListenAndServe(":10101", nil)
 	return nil
 }

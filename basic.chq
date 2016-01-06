@@ -1,20 +1,14 @@
-# node c ::= PidDropper 101
-# node cc ::= CcCommenter
-# node o ::= CommentWriter log.txt
+#node inp ::= NetInput 127.0.0.1 5501
+node inp ::= FileInput mpts.ts
+node ctr ::= PidCounter
+node ccc ::= CcCommenter
+node cwr ::= CommentWriter comments.txt
+node out ::= FileWriter o.ts
+node pat ::= PatParser 0
+node rmp ::= PidRemapper 310 433
+node brc ::= PcrBrCommenter 310
 
-# node f ::= FileInput mpts.ts
-node inp  ::= NetInput 127.0.01 2000
-node pat  ::= PatParser 0
-node pmt1 ::= PmtParser 16
-node pmt2 ::= PmtParser 256
-node ctr  ::= PidCounter
+
+conn inp -> brc -> cwr -> ctr -> rmp -> out
 
 conn inp -> pat
-conn inp -> ctr
-conn inp -> pmt1
-conn inp -> pmt2
-
-#conn f -> p -> c -> o
-#conn f -> p
-#conn p -> c
-#conn c -> o

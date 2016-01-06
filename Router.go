@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"sync"
 )
 
 type Routeable interface {
@@ -14,6 +15,7 @@ type Routeable interface {
 
 type Router struct {
 	Nodes map[string]Routeable
+	sync.Mutex
 }
 
 // construct a new, blank router
@@ -23,7 +25,20 @@ func NewRouter() *Router {
 	}
 }
 
+func (r *Router) GetNodeByName(name string) (Routeable, error) {
+	r.Lock()
+	defer r.Unlock()
+	node, ok := r.Nodes[name]
+	if !ok {
+		return nil, errors.New("No such node " + name)
+	} else {
+		return node, nil
+	}
+}
+
 func (r *Router) RegisterNode(name string, newnode Routeable) error {
+	r.Lock()
+	defer r.Unlock()
 	_, present := r.Nodes[name]
 	if present {
 		return errors.New("Node already exists: " + name)
@@ -34,6 +49,8 @@ func (r *Router) RegisterNode(name string, newnode Routeable) error {
 }
 
 func (r *Router) Connect(src, dst string) error {
+	r.Lock()
+	defer r.Unlock()
 	sn, ok := r.Nodes[src]
 	if !ok {
 		return errors.New("No such node " + src)
@@ -47,6 +64,8 @@ func (r *Router) Connect(src, dst string) error {
 }
 
 func (r *Router) Disconnect(src, dst string) error {
+	r.Lock()
+	defer r.Unlock()
 	sn, ok := r.Nodes[src]
 	if !ok {
 		return errors.New("No such node " + src)
@@ -63,6 +82,8 @@ func (r *Router) Disconnect(src, dst string) error {
 // used after ApplyConfig is complete to start
 // all nodes processing.
 func (r *Router) ToggleAll() {
+	r.Lock()
+	defer r.Unlock()
 	for _, node := range r.Nodes {
 		node.Toggle()
 	}

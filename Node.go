@@ -38,15 +38,7 @@ func (node *TsNode) UnRegisterListener(toremove chan TsPacket) {
 
 // list out all the currently available outputs
 func (node *TsNode) GetOutputs() []chan TsPacket {
-	// todo this should probably implemented in Broadcaster
-	node.output.m.Lock()
-	defer node.output.m.Unlock()
-
-	ret := make([]chan TsPacket, 0)
-	for _, ch := range node.output.listeners {
-		ret = append(ret, ch)
-	}
-	return ret
+	return node.output.GetOutputs()
 }
 
 // send the provided packet using our output

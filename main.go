@@ -12,6 +12,11 @@ func Check(err error) {
 }
 
 func main() {
+	// f, _ := os.Create("cpuprof")
+	// defer f.Close()
+	// pprof.StartCPUProfile(f)
+	// defer pprof.StopCPUProfile()
+
 	log.Print("starting")
 	var err error
 	cfgdat, _ := ioutil.ReadFile("basic.chq")
@@ -20,6 +25,8 @@ func main() {
 	err = serv.Router.ApplyConfig(string(cfgdat))
 	Check(err)
 	serv.Router.ToggleAll()
+
+	// time.Sleep(time.Second * 15)
 
 	err = serv.Start()
 	Check(err)
