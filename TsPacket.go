@@ -103,61 +103,75 @@ func NewAdaptationField(data []byte) *AdaptationField {
 		//no af
 		return &af
 	}
-	// log.Printf("%v", data)
-	af.Length = data[4]
-	af.Di = data[5]&128 != 0
-	af.Rai = data[5]&64 != 0
-	af.Espi = data[5]&32 != 0
-	af.Pcrf = data[5]&16 != 0
-	af.Opcrf = data[5]&8 != 0
-	af.Spf = data[5]&4 != 0
-	af.Tpdf = data[5]&2 != 0
-	af.Afef = data[5]&1 != 0
+	if len(data) >= 6 {
+		af.Length = data[4]
+		af.Di = data[5]&128 != 0
+		af.Rai = data[5]&64 != 0
+		af.Espi = data[5]&32 != 0
+		af.Pcrf = data[5]&16 != 0
+		af.Opcrf = data[5]&8 != 0
+		af.Spf = data[5]&4 != 0
+		af.Tpdf = data[5]&2 != 0
+		af.Afef = data[5]&1 != 0
+	}
 
 	//keep track of byte offset depending on flags
 	ofs := 6
 
 	if af.Pcrf {
-		af.Pcrb = 0
-		af.Pcrb += int64(data[ofs]) << 25
-		af.Pcrb += int64(data[ofs+1]) << 17
-		af.Pcrb += int64(data[ofs+2]) << 9
-		af.Pcrb += int64(data[ofs+3]) << 1
-		af.Pcrb += int64(data[ofs+4] >> 7)
+		if ofs+5 < len(data) {
+			af.Pcrb = 0
+			af.Pcrb += int64(data[ofs]) << 25
+			af.Pcrb += int64(data[ofs+1]) << 17
+			af.Pcrb += int64(data[ofs+2]) << 9
+			af.Pcrb += int64(data[ofs+3]) << 1
+			af.Pcrb += int64(data[ofs+4] >> 7)
 
-		af.Pcre = int64(data[ofs+4]&1) << 9
-		af.Pcre += int64(data[ofs+5])
+			af.Pcre = int64(data[ofs+4]&1) << 9
+			af.Pcre += int64(data[ofs+5])
+		}
 		ofs += 6
 	}
 	if af.Opcrf {
-		af.Opcrb = 0
-		af.Opcrb += int64(data[ofs]) << 25
-		af.Opcrb += int64(data[ofs+1]) << 17
-		af.Opcrb += int64(data[ofs+2]) << 9
-		af.Opcrb += int64(data[ofs+3]) << 1
-		af.Opcrb += int64(data[ofs+4] >> 7)
+		if ofs+5 < len(data) {
+			af.Opcrb = 0
+			af.Opcrb += int64(data[ofs]) << 25
+			af.Opcrb += int64(data[ofs+1]) << 17
+			af.Opcrb += int64(data[ofs+2]) << 9
+			af.Opcrb += int64(data[ofs+3]) << 1
+			af.Opcrb += int64(data[ofs+4] >> 7)
 
-		af.Opcre = int64(data[ofs+4]&1) << 9
-		af.Opcre += int64(data[ofs+5])
+			af.Opcre = int64(data[ofs+4]&1) << 9
+			af.Opcre += int64(data[ofs+5])
+		}
 		ofs += 6
 	}
 	if af.Spf {
-		af.Sc = data[ofs]
+		if ofs < len(data) {
+			af.Sc = data[ofs]
+		}
 		ofs += 1
 	}
 	if af.Tpdf {
-		af.Tpdl = data[ofs]
-		af.Tpd = data[ofs+1 : ofs+int(af.Tpdl)+1]
+		if ofs < len(data) {
+			af.Tpdl = data[ofs]
+			if ofs+int(af.Tpdl)+1 < len(data) {
+				af.Tpd = data[ofs+1 : ofs+int(af.Tpdl)+1]
+			}
+		}
 		ofs += int(af.Tpdl + 1)
 	}
 	if af.Afef {
-		af.Afel = data[ofs]
-		ofs += 1
+		if ofs+1 < len(data) {
+			af.Afel = data[ofs]
+			ofs += 1
 
-		af.Ltwf = data[ofs]&128 != 0
-		af.Pwrf = data[ofs]&64 != 0
-		af.Ssf = data[ofs]&32 != 0
-		ofs += 1
+			af.Ltwf = data[ofs]&128 != 0
+			af.Pwrf = data[ofs]&64 != 0
+			af.Ssf = data[ofs]&32 != 0
+			ofs += 1
+
+		}
 		// TODO add the extension fields
 	}
 	return &af

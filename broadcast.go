@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"sync"
 )
 
@@ -51,7 +50,6 @@ func (b *Broadcaster) RegisterChan(ch chan TsPacket) {
 		// so we have to let it panic and then recover
 		defer func() {
 			if r := recover(); r != nil {
-				fmt.Println("Recovered from closed channel err", r)
 				b.listeners[b.nextId] = ch
 			}
 		}()

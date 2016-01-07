@@ -38,6 +38,7 @@ func (node *CommentFilter) process() {
 }
 
 func (node *CommentFilter) closeDown() {
+	node.Active = false
 	log.Print("closing down CommentFilter")
 	node.output.Close()
 }

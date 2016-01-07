@@ -122,7 +122,6 @@ func (s *Server) conn(w http.ResponseWriter, r *http.Request) {
 			}
 
 		case "DELETE":
-			// TODO implement deleting a connection
 			// expect uri like /conn/src/dst
 			if len(segs) < 3 {
 				http.Error(w, "src & dest nodes not specified!", http.StatusNotFound)
@@ -147,6 +146,22 @@ func (s *Server) conn(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) state(w http.ResponseWriter, r *http.Request) {
 	// todo implement state toggling for each node or all nodes
+	// PUT to /state/ toggles all nodes
+	// PUT request to /state/nodename will trigger a toggle
+	// response with bool of node's new state
+	name := r.URL.Path[len("/state/"):]
+	if len(name) == 0 {
+		s.Router.ToggleAll()
+		return
+	}
+	node, err := s.Router.GetNodeByName(name)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+	} else {
+		// todo return new state
+		node.Toggle()
+	}
+
 }
 
 // start a server serving. blocks until err or exit

@@ -38,6 +38,7 @@ func (node *PidCounter) process() {
 }
 
 func (node *PidCounter) closeDown() {
+	node.Active = false
 	log.Printf("closing down pid counter, found %d pids", len(node.Pids))
 	node.output.Close()
 }

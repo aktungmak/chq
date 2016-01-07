@@ -39,6 +39,7 @@ func (node *PidFilter) process() {
 }
 
 func (node *PidFilter) closeDown() {
+	node.Active = false
 	log.Printf("closing down PidFilter for pid %d", node.Pid)
 	node.output.Close()
 }

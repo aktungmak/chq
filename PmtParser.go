@@ -84,6 +84,7 @@ func (node *PmtParser) process() {
 }
 
 func (node *PmtParser) closeDown() {
+	node.Active = false
 	log.Printf("closing down PmtParser for pid %d", node.Pid)
 	node.output.Close()
 }

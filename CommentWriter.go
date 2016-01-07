@@ -46,6 +46,7 @@ func (node *CommentWriter) process() {
 }
 
 func (node *CommentWriter) closeDown() {
+	node.Active = false
 	node.file.Close()
 	log.Printf("closing down CommentWriter to file %s", node.file.Name())
 	node.output.Close()

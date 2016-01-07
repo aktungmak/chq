@@ -60,6 +60,7 @@ func (node *PcrBrCommenter) process() {
 }
 
 func (node *PcrBrCommenter) closeDown() {
+	node.Active = false
 	log.Printf("closing down PcrBrCommenter on pcr pid %d", node.PcrPid)
 	node.output.Close()
 }

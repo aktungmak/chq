@@ -44,6 +44,7 @@ func (node *FileWriter) process() {
 }
 
 func (node *FileWriter) closeDown() {
+	node.Active = false
 	node.file.Close()
 	log.Printf("closing down FileWriter to file %s", node.file.Name())
 	node.output.Close()

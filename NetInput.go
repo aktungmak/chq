@@ -80,6 +80,7 @@ func (node *NetInput) process() {
 }
 
 func (node *NetInput) closeDown() {
+	node.Active = false
 	log.Printf("Closing down NetInput on %s@%d", node.addr.IP, node.addr.Port)
 	node.conn.Close()
 	node.output.Close()

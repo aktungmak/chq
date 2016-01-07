@@ -37,6 +37,7 @@ func (node *PidDropper) process() {
 }
 
 func (node *PidDropper) closeDown() {
+	node.Active = false
 	log.Printf("closing down pid dropper for pid %d", node.Pid)
 	node.output.Close()
 }

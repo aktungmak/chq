@@ -61,6 +61,7 @@ func (node *FileInput) process() {
 }
 
 func (node *FileInput) closeDown() {
+	node.Active = false
 	log.Printf("closing down file input for file %s", node.file.Name())
 	node.file.Close()
 	node.output.Close()

@@ -56,6 +56,7 @@ func (node *CcCommenter) process() {
 }
 
 func (node *CcCommenter) closeDown() {
+	node.Active = false
 	log.Print("closing down CcCommenter")
 	node.output.Close()
 }

@@ -83,6 +83,7 @@ func (node *PatParser) process() {
 }
 
 func (node *PatParser) closeDown() {
+	node.Active = false
 	log.Print("closing down PatParser")
 	node.output.Close()
 }

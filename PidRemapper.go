@@ -49,6 +49,7 @@ func (node *PidRemapper) process() {
 }
 
 func (node *PidRemapper) closeDown() {
+	node.Active = false
 	log.Printf("closing down pidremapper from pid %d to pid %d", node.FromPid, node.ToPid)
 	node.output.Close()
 }
