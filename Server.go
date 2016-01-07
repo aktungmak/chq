@@ -2,8 +2,8 @@ package main
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
 const (
@@ -77,8 +77,8 @@ func (s *Server) types(w http.ResponseWriter, r *http.Request) {
 // on a POST, make a new connection
 // TODO add DELETE to disconnect
 func (s *Server) conn(w http.ResponseWriter, r *http.Request) {
-	name := r.URL.Path[len("/conn/"):]
-	node, err := s.Router.GetNodeByName(name)
+	segs := strings.Split(r.URL.Path, "/")
+	node, err := s.Router.GetNodeByName(segs[2])
 	if err != nil {
 		http.Error(w, "node not found!", http.StatusNotFound)
 	} else {
@@ -105,18 +105,40 @@ func (s *Server) conn(w http.ResponseWriter, r *http.Request) {
 			}
 
 		case "POST":
-			// expect string with name of target
-			buf, err := ioutil.ReadAll(r.Body)
-			tgt := string(buf)
-			err = s.Router.Connect(name, tgt)
+			// expect uri like /conn/src/dst
+			if len(segs) < 3 {
+				http.Error(w, "src & dest nodes not specified!", http.StatusNotFound)
+				return
+			}
+			src := segs[2]
+			dst := segs[3]
+			err = s.Router.Connect(src, dst)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			} else {
+				w.WriteHeader(http.StatusCreated)
 				return
 			}
 
 		case "DELETE":
 			// TODO implement deleting a connection
-			fallthrough
+			// expect uri like /conn/src/dst
+			if len(segs) < 3 {
+				http.Error(w, "src & dest nodes not specified!", http.StatusNotFound)
+				return
+			}
+			src := segs[2]
+			dst := segs[3]
+			err := s.Router.Disconnect(src, dst)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			} else {
+				w.WriteHeader(http.StatusNoContent)
+				return
+			}
+
 		default:
 			http.Error(w, "", http.StatusMethodNotAllowed)
 		}
