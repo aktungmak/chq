@@ -52,13 +52,11 @@ func BenchmarkSend(b *testing.B) {
 
 	pkt := NewTsPacket(sampPkt)
 	go func() {
-		for p := range out1 {
-			p = p
+		for _ = range out1 {
 		}
 	}()
 	go func() {
-		for p := range out2 {
-			p = p
+		for _ = range out2 {
 		}
 	}()
 
@@ -98,8 +96,7 @@ func BenchmarkPidRemapper(b *testing.B) {
 
 	pkt := NewTsPacket(sampPkt)
 	go func() {
-		for {
-			<-out
+		for _ = range out {
 		}
 	}()
 
@@ -162,8 +159,7 @@ func BenchmarkPcrBrCommenter(b *testing.B) {
 
 	pkt := NewTsPacket(sampPcrPkt)
 	go func() {
-		for {
-			<-out
+		for _ = range out {
 		}
 	}()
 

@@ -14,7 +14,7 @@ func Check(err error) {
 }
 
 func main() {
-	f, _ := os.Create("cpuprof")
+	f, _ := os.Create("cpuprof2")
 	defer f.Close()
 	pprof.StartCPUProfile(f)
 
@@ -28,10 +28,10 @@ func main() {
 	serv.Router.ToggleAll()
 
 	c := make(chan TsPacket, 10)
-	n, _ := serv.Router.GetNodeByName("out")
+	n, _ := serv.Router.GetNodeByName("rmp")
 	n.RegisterListener(c)
-	for p := range c {
-		p = p
+	for _ = range c {
+		// p = p
 	}
 	pprof.StopCPUProfile()
 	// err = serv.Start()

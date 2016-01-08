@@ -38,7 +38,7 @@ func (node *FileWriter) process() {
 	for pkt := range node.input {
 		node.PktsIn++
 		node.Send(pkt)
-
+		// TODO buffer writes, this is crazy slow
 		node.file.Write(pkt.bytes)
 	}
 }

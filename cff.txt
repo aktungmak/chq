@@ -1,5 +1,0 @@
-TODO feature list
-
-SCTE35 node
-server struct to manage router and http access
-Trap sender
