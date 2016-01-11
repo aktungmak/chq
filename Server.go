@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 )
@@ -36,28 +37,46 @@ func (s *Server) summary(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	} else {
 		w.Write(dat)
-
 	}
 }
 
-// return the info on a particular node, specified by name
+// GET returns info on a particular node, specified by name
+// todo POST creates a new node
 func (s *Server) nodes(w http.ResponseWriter, r *http.Request) {
 	name := r.URL.Path[len("/nodes/"):]
-	v, err := s.Router.GetNodeByName(name)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
-	} else {
-		dat, err := marshal(v)
+
+	switch r.Method {
+	case "GET":
+		v, err := s.Router.GetNodeByName(name)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusNotFound)
 		} else {
-			w.Write(dat)
+			dat, err := marshal(v)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			} else {
+				w.Write(dat)
+			}
 		}
+	case "POST":
+		// expect object in body describing node
+		var config struct {
+			Type string `json:"type"`
+			Args string `json:"args"`
+		}
+		decoder := json.NewDecoder(r.Body)
+		err := decoder.Decode(&config)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		fmt.Printf("%v", config)
+		// todo create a node!
 	}
 }
 
 // list out all the available node types
-// TODO make into a map of name: description
+// TODO make into a map of name: description, args
 func (s *Server) types(w http.ResponseWriter, r *http.Request) {
 	names := make([]string, 0, len(AvailableNodes))
 	for k := range AvailableNodes {
@@ -73,18 +92,16 @@ func (s *Server) types(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// on a GET, list out all the connections for that node
-// on a POST, make a new connection
-// TODO add DELETE to disconnect
+// GET lists out all the connections for that node
+// POST to /conn/src/dst make a new connection
+// DELETE of /conn/src/dst disconnects
 func (s *Server) conn(w http.ResponseWriter, r *http.Request) {
 	segs := strings.Split(r.URL.Path, "/")
 	node, err := s.Router.GetNodeByName(segs[2])
 	if err != nil {
 		http.Error(w, "node not found!", http.StatusNotFound)
 	} else {
-
 		switch r.Method {
-
 		case "GET":
 			res := make([]string, 0)
 			outs := node.GetOutputs()
@@ -120,7 +137,6 @@ func (s *Server) conn(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusCreated)
 				return
 			}
-
 		case "DELETE":
 			// expect uri like /conn/src/dst
 			if len(segs) < 3 {
@@ -137,29 +153,32 @@ func (s *Server) conn(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusNoContent)
 				return
 			}
-
 		default:
 			http.Error(w, "", http.StatusMethodNotAllowed)
 		}
 	}
 }
 
+// PUT to /state/ toggles all nodes
+// PUT request to /state/nodename will trigger a single toggle
+// response with bool of node's new state
 func (s *Server) state(w http.ResponseWriter, r *http.Request) {
-	// todo implement state toggling for each node or all nodes
-	// PUT to /state/ toggles all nodes
-	// PUT request to /state/nodename will trigger a toggle
-	// response with bool of node's new state
 	name := r.URL.Path[len("/state/"):]
-	if len(name) == 0 {
-		s.Router.ToggleAll()
-		return
-	}
 	node, err := s.Router.GetNodeByName(name)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
-	} else {
-		// todo return new state
-		node.Toggle()
+
+	switch r.Method {
+	case "PUT":
+		if len(name) == 0 {
+			s.Router.ToggleAll()
+			return
+		}
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusNotFound)
+		} else {
+			fmt.Fprintf(w, "%t", node.Toggle())
+		}
+	default:
+		http.Error(w, "", http.StatusMethodNotAllowed)
 	}
 
 }

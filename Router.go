@@ -10,7 +10,7 @@ type Routeable interface {
 	RegisterListener(chan TsPacket)
 	UnRegisterListener(chan TsPacket)
 	GetOutputs() []chan TsPacket
-	Toggle()
+	Toggle() bool
 }
 
 type Router struct {

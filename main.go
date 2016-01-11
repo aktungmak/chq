@@ -3,8 +3,6 @@ package main
 import (
 	"io/ioutil"
 	"log"
-	"os"
-	"runtime/pprof"
 )
 
 func Check(err error) {
@@ -14,9 +12,15 @@ func Check(err error) {
 }
 
 func main() {
-	f, _ := os.Create("cpuprof2")
-	defer f.Close()
-	pprof.StartCPUProfile(f)
+	// f, _ := os.Create("cpuprof2")
+	// defer f.Close()
+	// pprof.StartCPUProfile(f)
+	// pprof.StopCPUProfile()
+	// c := make(chan TsPacket, 10)
+	// n, _ := serv.Router.GetNodeByName("rmp")
+	// n.RegisterListener(c)
+	// for _ = range c {
+	// }
 
 	log.Print("starting")
 	var err error
@@ -27,15 +31,8 @@ func main() {
 	Check(err)
 	serv.Router.ToggleAll()
 
-	c := make(chan TsPacket, 10)
-	n, _ := serv.Router.GetNodeByName("rmp")
-	n.RegisterListener(c)
-	for _ = range c {
-		// p = p
-	}
-	pprof.StopCPUProfile()
-	// err = serv.Start()
-	// Check(err)
+	err = serv.Start()
+	Check(err)
 
 	/////////
 

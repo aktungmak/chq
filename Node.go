@@ -58,12 +58,14 @@ func (node *TsNode) Send(pkt TsPacket) {
 
 // Switch a node between being active/inactive states
 // The Send() method will block until node.Active == true
-func (node *TsNode) Toggle() {
+// returns the new state (true = active)
+func (node *TsNode) Toggle() bool {
 	if node.L == nil {
 		node.Cond = *sync.NewCond(&sync.Mutex{})
 	}
 	node.L.Lock()
+	defer node.Signal()
+	defer node.L.Unlock()
 	node.Active = !node.Active
-	node.L.Unlock()
-	node.Signal()
+	return node.Active
 }
