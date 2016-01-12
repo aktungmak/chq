@@ -41,37 +41,60 @@ func (s *Server) summary(w http.ResponseWriter, r *http.Request) {
 }
 
 // GET returns info on a particular node, specified by name
-// todo POST creates a new node
+// POST creates a new node
+// DELETE removes a node
 func (s *Server) nodes(w http.ResponseWriter, r *http.Request) {
 	name := r.URL.Path[len("/nodes/"):]
 
 	switch r.Method {
 	case "GET":
-		v, err := s.Router.GetNodeByName(name)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusNotFound)
-		} else {
-			dat, err := marshal(v)
+		if len(name) == 0 {
+			dat, err := marshal(s.Router.Nodes)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 			} else {
 				w.Write(dat)
 			}
+		} else {
+			v, err := s.Router.GetNodeByName(name)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusNotFound)
+			} else {
+				dat, err := marshal(v)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+				} else {
+					w.Write(dat)
+				}
+			}
 		}
 	case "POST":
-		// expect object in body describing node
+		// expect object in body describing node, name is in uri
+		var err error
 		var config struct {
-			Type string `json:"type"`
-			Args string `json:"args"`
+			Type string   `json:"type"`
+			Args []string `json:"args"`
 		}
 		decoder := json.NewDecoder(r.Body)
-		err := decoder.Decode(&config)
+
+		err = decoder.Decode(&config)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		fmt.Printf("%v", config)
-		// todo create a node!
+
+		err = s.Router.CreateNode(name, config.Type, config.Args...)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+		} else {
+			w.Header().Add("Location", r.URL.String())
+			w.WriteHeader(http.StatusCreated)
+		}
+	case "DELETE":
+		delete(s.Router.Nodes, name)
+		w.WriteHeader(http.StatusNoContent)
+	default:
+		http.Error(w, "", http.StatusMethodNotAllowed)
 	}
 }
 
@@ -180,7 +203,6 @@ func (s *Server) state(w http.ResponseWriter, r *http.Request) {
 	default:
 		http.Error(w, "", http.StatusMethodNotAllowed)
 	}
-
 }
 
 // start a server serving. blocks until err or exit

@@ -14,12 +14,9 @@ type CommentFilter struct {
 //register with global AvailableNodes map
 func init() {
 	AvailableNodes.Register("CommentFilter", NewCommentFilter)
-
 }
 
-func NewCommentFilter(fname string) (*CommentFilter, error) {
-	// try to open file
-
+func NewCommentFilter() (*CommentFilter, error) {
 	node := &CommentFilter{}
 	node.input = make(chan TsPacket, CHAN_BUF_SIZE)
 

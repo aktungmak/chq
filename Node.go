@@ -48,10 +48,11 @@ func (node *TsNode) Send(pkt TsPacket) {
 	if node.L == nil {
 		node.Cond = *sync.NewCond(&sync.Mutex{})
 	}
+	node.L.Lock()
 	for !node.Active {
-		node.L.Lock()
 		node.Wait()
 	}
+	node.L.Unlock()
 	node.output.Send(pkt)
 	node.PktsOut++
 }

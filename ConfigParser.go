@@ -50,19 +50,26 @@ func (r *Router) NodeDecl(toks []string) error {
 	}
 
 	name := toks[1]
+	kind := toks[3]
+	args := toks[4:]
 
-	_, ok := AvailableNodes[toks[3]]
+	return r.CreateNode(name, kind, args...)
+
+}
+
+func (r *Router) CreateNode(name, kind string, args ...string) error {
+	n, ok := AvailableNodes[kind]
 	if !ok {
-		return errors.New("Unknown node type " + toks[3])
+		return errors.New("Unknown node type " + kind)
 	}
 
 	// extract the constructor function as a relfelct.Value
-	nodectr := reflect.ValueOf(AvailableNodes[toks[3]])
-	nodetype := reflect.TypeOf(AvailableNodes[toks[3]])
+	nodectr := reflect.ValueOf(n)
+	nodetype := reflect.TypeOf(n)
 
 	// make sure the arity of the constructor matches
 	// the number of args provided
-	if nodetype.NumIn() != len(toks)-4 {
+	if nodetype.NumIn() != len(args) {
 		return errors.New("Incorrect number of args provided!")
 	}
 
@@ -70,33 +77,33 @@ func (r *Router) NodeDecl(toks []string) error {
 	var err error
 	var val interface{}
 	var node Routeable
-	args := make([]reflect.Value, 0)
+	rargs := make([]reflect.Value, 0)
 	for i := 0; i < nodetype.NumIn(); i++ {
 		switch nodetype.In(i).Kind() {
 		case reflect.Bool:
-			val, err = strconv.ParseBool(toks[4+i])
+			val, err = strconv.ParseBool(args[i])
 		case reflect.Int:
-			val, err = strconv.ParseInt(toks[4+i], 10, 32)
+			val, err = strconv.ParseInt(args[i], 10, 32)
 			val = int(val.(int64))
 		case reflect.Int64:
-			val, err = strconv.ParseInt(toks[4+i], 10, 64)
+			val, err = strconv.ParseInt(args[i], 10, 64)
 		case reflect.Float64:
-			val, err = strconv.ParseFloat(toks[4+i], 64)
+			val, err = strconv.ParseFloat(args[i], 64)
 		case reflect.String:
-			val = toks[4+i]
+			val = args[i]
 			err = nil
 		default:
-			return errors.New("Invalid argument in node declaration: " + "TODO value")
+			return errors.New("Invalid argument in node declaration: " + args[i])
 		}
 		if err != nil {
 			return err
 		} else {
-			args = append(args, reflect.ValueOf(val))
+			rargs = append(rargs, reflect.ValueOf(val))
 		}
 	}
 
 	// finally call the constructor to get the new node value
-	res := nodectr.Call(args)
+	res := nodectr.Call(rargs)
 	node = res[0].Interface().(Routeable)
 
 	if res[1].Interface() != nil {
