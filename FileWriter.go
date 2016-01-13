@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"log"
 	"os"
 )
@@ -9,7 +10,9 @@ import (
 // receives to a file.
 // It passes through TS packets unmodified.
 type FileWriter struct {
-	file *os.File
+	file     *os.File
+	writer   *bufio.Writer
+	FileName string
 	TsNode
 }
 
@@ -27,7 +30,9 @@ func NewFileWriter(fname string) (*FileWriter, error) {
 
 	node := &FileWriter{}
 	node.file = fh
+	node.writer = bufio.NewWriterSize(fh, TS_PKT_SIZE*FILE_CHUNK_SIZE)
 	node.input = make(chan TsPacket, CHAN_BUF_SIZE)
+	node.FileName = fname
 
 	go node.process()
 	return node, nil
@@ -38,13 +43,13 @@ func (node *FileWriter) process() {
 	for pkt := range node.input {
 		node.PktsIn++
 		node.Send(pkt)
-		// TODO buffer writes, this is crazy slow
-		node.file.Write(pkt.bytes)
+		node.writer.Write(pkt.bytes)
 	}
 }
 
 func (node *FileWriter) closeDown() {
 	node.Active = false
+	node.writer.Flush()
 	node.file.Close()
 	log.Printf("closing down FileWriter to file %s", node.file.Name())
 	node.output.Close()

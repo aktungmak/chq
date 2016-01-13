@@ -22,6 +22,11 @@ var sampPmt = []byte{
 	0x0E, 0x03, 0xC0, 0x02, 0x88, 0x56, 0x00, 0xF7, 0xB8, 0xEF,
 	0x6C}
 
+var sampSdt = []byte{
+	0x42, 0xF0, 0x1A, 0x00, 0x00, 0xC3, 0x00, 0x00, 0x00, 0x01,
+	0xFF, 0x00, 0x01, 0xFC, 0x80, 0x09, 0x48, 0x07, 0x01, 0x00,
+	0x04, 0x39, 0x58, 0x4D, 0x20, 0xDE, 0xC8, 0xD8, 0x4B}
+
 // Tests
 
 func TestNewPat(t *testing.T) {
@@ -154,7 +159,63 @@ func TestNewPmt(t *testing.T) {
 	if pmt.Crc != 0xf7b8ef6c {
 		t.Errorf("PMT CRC was not copied correctly, expected 0xf7b8ef6c got %x", pmt.Crc)
 	}
+}
 
+func TestNewSdt(t *testing.T) {
+	sdt, err := NewSdt(sampSdt)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	if sdt.Tid != 0x42 {
+		t.Errorf("Table ID should be 0x42, got %x", sdt.Tid)
+	}
+	if sdt.Ssi != true {
+		t.Errorf("Section Syntax Indicator should be true, got %t", sdt.Ssi)
+	}
+	if sdt.Sl != 0x1a {
+		t.Errorf("Section Length should be 0x1a, got %x", sdt.Sl)
+	}
+	if sdt.Tsid != 0x0 {
+		t.Errorf("TSID should be 0x0, got %x", sdt.Tsid)
+	}
+	if sdt.Vn != 0x1 {
+		t.Errorf("Version should be 0x1, got %x", sdt.Vn)
+	}
+	if sdt.Cni != true {
+		t.Errorf("Current/next indicator should be true, got %t", sdt.Cni)
+	}
+	if sdt.Sn != 0x0 {
+		t.Errorf("Section number should be 0x0, got %x", sdt.Sn)
+	}
+	if sdt.Lsn != 0x0 {
+		t.Errorf("Last section number should be 0x0, got %x", sdt.Lsn)
+	}
+	if sdt.Onid != 0x1 {
+		t.Errorf("Original network ID should be 0x1, got %x", sdt.Onid)
+	}
+	if len(sdt.Svcs) != 1 {
+		t.Errorf("Should only be 1 service, found %d", len(sdt.Svcs))
+	}
+
+	// service 1
+	if sdt.Svcs[0].Sid != 0x1 {
+		t.Errorf("Service 1 service ID should be 0x1, got %x", sdt.Svcs[0].Sid)
+	}
+	if sdt.Svcs[0].Esf != false {
+		t.Errorf("Service 1 EIT sched flag should be false, got %t", sdt.Svcs[0].Esf)
+	}
+	if sdt.Svcs[0].Epf != false {
+		t.Errorf("Service 1 EIT present/following should be false, got %t", sdt.Svcs[0].Epf)
+	}
+	if sdt.Svcs[0].Rs != 0x4 {
+		t.Errorf("Service 1 running status should be 0x4, got %x", sdt.Svcs[0].Rs)
+	}
+	if sdt.Svcs[0].Fcm != false {
+		t.Errorf("Service 1 free CA mode should be false, got %t", sdt.Svcs[0].Fcm)
+	}
+	if sdt.Svcs[0].Dll != 0x9 {
+		t.Errorf("Service 1 descriptor loop length should be 0x9, got %x", sdt.Svcs[0].Dll)
+	}
 }
 
 // Benchmarks

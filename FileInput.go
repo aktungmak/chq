@@ -7,7 +7,8 @@ import (
 )
 
 type FileInput struct {
-	file *os.File
+	file     *os.File
+	FileName string
 	TsNode
 }
 
@@ -27,6 +28,7 @@ func NewFileInput(fname string) (*FileInput, error) {
 	node := &FileInput{}
 	node.file = fh
 	node.input = nil
+	node.FileName = fname
 
 	go node.process()
 	return node, nil

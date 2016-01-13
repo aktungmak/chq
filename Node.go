@@ -18,6 +18,7 @@ type TsNode struct {
 	// this Cond syncs access to Active
 	// its .L field is lazily initialized
 	sync.Cond `json:"-"`
+	init      sync.Once
 }
 
 // accessor to get this node's input channel
@@ -45,9 +46,10 @@ func (node *TsNode) GetOutputs() []chan TsPacket {
 // broadcaster. if we are not active, wait for
 // the signal. increments counters appropriately.
 func (node *TsNode) Send(pkt TsPacket) {
-	if node.L == nil {
+	// lazy (but safe) init of Cond
+	node.init.Do(func() {
 		node.Cond = *sync.NewCond(&sync.Mutex{})
-	}
+	})
 	node.L.Lock()
 	for !node.Active {
 		node.Wait()
@@ -61,9 +63,11 @@ func (node *TsNode) Send(pkt TsPacket) {
 // The Send() method will block until node.Active == true
 // returns the new state (true = active)
 func (node *TsNode) Toggle() bool {
-	if node.L == nil {
+	// lazy (but safe) init of Cond
+	node.init.Do(func() {
 		node.Cond = *sync.NewCond(&sync.Mutex{})
-	}
+	})
+
 	node.L.Lock()
 	defer node.Signal()
 	defer node.L.Unlock()
