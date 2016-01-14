@@ -4,37 +4,36 @@ import (
 	"log"
 )
 
-// PmtParser watches the incoming TS packets for
+// SdtParser watches the incoming TS packets for
 // its Pid. It will try to reassemble these into a
-// complete section, and then parse as a Pmt.
+// complete section, and then parse as an Sdt.
 // When the version number changes, it will push
-// the CurPmt onto the slice of PrevPmts.
-type PmtParser struct {
-	PrevPmts []*Pmt
-	CurPmt   *Pmt
+// the CurSdt onto the slice of PrevSdts.
+type SdtParser struct {
+	PrevSdts []*Sdt
+	CurSdt   *Sdt
 	Pid      int
 	TsNode
 }
 
 //register with global AvailableNodes map
 func init() {
-	AvailableNodes.Register("PmtParser", NewPmtParser)
+	AvailableNodes.Register("SdtParser", NewSdtParser)
 }
 
-func NewPmtParser(pid int) (*PmtParser, error) {
-	node := &PmtParser{}
+func NewSdtParser(pid int) (*SdtParser, error) {
+	node := &SdtParser{}
 	node.input = make(chan TsPacket, CHAN_BUF_SIZE)
 
-	node.PrevPmts = make([]*Pmt, 0)
+	node.PrevSdts = make([]*Sdt, 0)
 	node.Pid = pid
 
 	go node.process()
 	return node, nil
 }
 
-func (node *PmtParser) process() {
+func (node *SdtParser) process() {
 	defer node.closeDown()
-	// section_length is 12 bits value
 	secBuf := make([]byte, 4096)
 	bufLen := 0
 	for pkt := range node.input {
@@ -47,14 +46,14 @@ func (node *PmtParser) process() {
 					// push data up to the ptr into the buffer
 					copy(secBuf[bufLen:], pkt.Payload[1:ptr+1])
 					bufLen += len(pkt.Payload) - ptr - 1 // IS IT -1???
-					pmt, err := NewPmt(secBuf[:bufLen])
+					Sdt, err := NewSdt(secBuf[:bufLen])
 					if err != nil {
 						log.Print(err)
 					} else {
-						if node.CurPmt != nil && node.CurPmt.Vn != pmt.Vn {
-							node.PrevPmts = append(node.PrevPmts, node.CurPmt)
+						if node.CurSdt != nil && node.CurSdt.Vn != Sdt.Vn {
+							node.PrevSdts = append(node.PrevSdts, node.CurSdt)
 						}
-						node.CurPmt = pmt
+						node.CurSdt = Sdt
 					}
 					bufLen = 0
 
@@ -67,7 +66,7 @@ func (node *PmtParser) process() {
 			} else {
 				if bufLen > 0 {
 					if bufLen+len(pkt.Payload) > 4096 {
-						log.Print("PMT has overflowed the section buffer!")
+						log.Print("SDT has overflowed the section buffer!")
 						bufLen = 0
 						continue
 					} else {
@@ -83,8 +82,8 @@ func (node *PmtParser) process() {
 	}
 }
 
-func (node *PmtParser) closeDown() {
+func (node *SdtParser) closeDown() {
 	node.Active = false
-	log.Printf("closing down PmtParser for pid %d", node.Pid)
+	log.Printf("closing down SdtParser for pid %d", node.Pid)
 	node.output.Close()
 }

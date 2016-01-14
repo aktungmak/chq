@@ -6,32 +6,44 @@ type descriptor interface {
 	Len() int
 }
 
+// parse a byte slice of descriptors into a slice of
+// descriptor structs. ignores unknown types.
 func ParseDescriptors(data []byte) []descriptor {
 	descriptorConstructors := map[byte]func([]byte) descriptor{
-		0x42: NewServiceDescriptor,
+		0x48: NewServiceDescriptor,
+		// new descriptor parsers register here
 	}
 	// todo handle multiple descriptors
-	ctr, ok := descriptorConstructors[data[0]]
-	if ok {
-		return ctr(data)
-	} else {
-		return nil
+	descs := make([]descriptor, 0)
+	for i := 0; i < len(data); {
+		ctr, ok := descriptorConstructors[data[i]]
+		if ok {
+			descs = append(descs, ctr(data[i:]))
+		}
+		i += int(data[i+1]) + 2
 	}
+	return descs
 }
 
 type ServiceDescriptor struct {
-	Dt   byte
-	Dl   byte
-	St   byte
-	Spnl byte
-	Spn  string
-	Snl  byte
-	Sn   string
+	Dt   byte   `json:"descriptor_tag"`
+	Dl   byte   `json:"descriptor_length"`
+	St   byte   `json:"service_type"`
+	Spnl byte   `json:"service_provider_name_length"`
+	Spn  string `json:"service_provider_name"`
+	Snl  byte   `json:"service_name_length"`
+	Sn   string `json:"service_name"`
 }
 
 func NewServiceDescriptor(data []byte) descriptor {
 	sd := ServiceDescriptor{}
-
+	sd.Dt = data[0]
+	sd.Dl = data[1]
+	sd.St = data[2]
+	sd.Spnl = data[3]
+	sd.Spn = string(data[4 : 4+sd.Spnl])
+	sd.Snl = data[4+sd.Spnl]
+	sd.Sn = string(data[5+sd.Spnl : 5+sd.Spnl+sd.Snl])
 	return sd
 }
 

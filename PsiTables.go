@@ -194,7 +194,7 @@ func NewSdt(data []byte) (*Sdt, error) {
 			return sdt, errors.New("SDT data length and descriptor_loop_length mismatch!")
 		}
 
-		// svc.Descriptors := ParseDescriptors(data[i+5 : i+5+svc.Dll])
+		svc.Descriptors = ParseDescriptors(data[i+5 : i+5+svc.Dll])
 
 		sdt.Svcs = append(sdt.Svcs, svc)
 		i += 5 + svc.Dll
@@ -205,6 +205,5 @@ func NewSdt(data []byte) (*Sdt, error) {
 	if crc := CalculateCrc32(data[:i]); crc != sdt.Crc {
 		return sdt, errors.New(fmt.Sprintf("CRC error! Calculated %x but SDT says %x", crc, sdt.Crc))
 	}
-
 	return sdt, nil
 }
