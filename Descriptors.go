@@ -10,13 +10,19 @@ func ParseDescriptors(data []byte) []descriptor {
 	descriptorConstructors := map[byte]func([]byte) descriptor{
 		0x42: NewServiceDescriptor,
 	}
-	// todo handle multiple descriptors
-	ctr, ok := descriptorConstructors[data[0]]
-	if ok {
-		return ctr(data)
-	} else {
-		return nil
+
+	ret := make([]descriptor, 0)
+	i := 0
+	for {
+		ctr, ok := descriptorConstructors[data[i]]
+		if !ok {
+			break
+		}
+		desc := ctr(data[0:])
+		ret = append(ret, desc)
+		i += desc.Len()
 	}
+	return ret
 }
 
 type ServiceDescriptor struct {
