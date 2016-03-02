@@ -51,6 +51,7 @@ func TestNewTsPacketHeader(t *testing.T) {
 	}
 
 }
+
 func TestNewAdaptationField(t *testing.T) {
 	// TODO find a TS packet example with all fields present
 	// only testing what is present in the sample TS packet
@@ -98,6 +99,51 @@ func TestNewAdaptationField(t *testing.T) {
 	}
 	if af.Pcre != 0x14 {
 		t.Errorf("Pcre should be 0x14, got %x", af.Pcre)
+	}
+}
+
+// this test checks whether we handle zero-length adaptation layer
+// it is a common error to no handle this correctly
+func TestZlal(t *testing.T) {
+	zlalSample := sample
+	zlalSample[4] = 0
+
+	af := NewAdaptationField(zlalSample)
+
+	// length
+	if af.Length != 0 {
+		t.Errorf("AF length is incorrect, expected 0 got %d", af.Length)
+	}
+
+	// indicators
+	if af.Di != false {
+		t.Errorf("DI should be false, got %t", af.Di)
+	}
+	if af.Rai != false {
+		t.Errorf("Rai should be false, got %t", af.Rai)
+	}
+	if af.Espi != false {
+		t.Errorf("Espi should be false, got %t", af.Espi)
+	}
+
+	// option flags
+	if af.Pcrf != false {
+		t.Errorf("Pcrf should be false, got %t", af.Pcrf)
+	}
+	if af.Opcrf != false {
+		t.Errorf("Opcrf should be false, got %t", af.Opcrf)
+	}
+	if af.Spf != false {
+		t.Errorf("Spf should be false, got %t", af.Spf)
+	}
+	if af.Tpdf != false {
+		t.Errorf("Tpdf should be false, got %t", af.Tpdf)
+	}
+	if af.Afef != false {
+		t.Errorf("Afef should be false, got %t", af.Afef)
+	}
+	if af.Afef != false {
+		t.Errorf("Afef should be false, got %t", af.Afef)
 	}
 }
 

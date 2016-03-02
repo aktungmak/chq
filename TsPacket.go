@@ -103,6 +103,10 @@ func NewAdaptationField(data []byte) *AdaptationField {
 		//no af
 		return &af
 	}
+	if data[4] == 0 {
+		//zero length af
+		return &af
+	}
 	if len(data) >= 6 {
 		af.Length = data[4]
 		af.Di = data[5]&128 != 0

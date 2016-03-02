@@ -18,7 +18,8 @@ type TsNode struct {
 	// this Cond syncs access to Active
 	// its .L field is lazily initialized
 	sync.Cond `json:"-"`
-	init      sync.Once
+	// make sure we only init Once!
+	init sync.Once
 }
 
 // accessor to get this node's input channel

@@ -45,7 +45,7 @@ func (node *SdtParser) process() {
 				if bufLen > 0 {
 					// push data up to the ptr into the buffer
 					copy(secBuf[bufLen:], pkt.Payload[1:ptr+1])
-					bufLen += len(pkt.Payload) - ptr - 1 // IS IT -1???
+					bufLen += len(pkt.Payload) - ptr - 1
 					Sdt, err := NewSdt(secBuf[:bufLen])
 					if err != nil {
 						log.Print(err)

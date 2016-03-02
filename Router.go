@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"log"
 	"sync"
 )
 
@@ -52,7 +51,6 @@ func (r *Router) RegisterNode(name string, newnode Routeable) error {
 func (r *Router) Connect(src, dst string) error {
 	r.Lock()
 	defer r.Unlock()
-	log.Print("acquired lock")
 	sn, ok := r.Nodes[src]
 	if !ok {
 		return errors.New("No such node " + src)
