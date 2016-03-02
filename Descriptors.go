@@ -13,19 +13,23 @@ func ParseDescriptors(data []byte) []descriptor {
 		0x48: NewServiceDescriptor,
 		// new descriptor parsers register here
 	}
-	// todo handle multiple descriptors
-	descs := make([]descriptor, 0)
-	for i := 0; i < len(data); {
+
+	ret := make([]descriptor, 0)
+	i := 0
+	for {
 		ctr, ok := descriptorConstructors[data[i]]
-		if ok {
-			descs = append(descs, ctr(data[i:]))
+		if !ok {
+			break
 		}
-		i += int(data[i+1]) + 2
+		desc := ctr(data[0:])
+		ret = append(ret, desc)
+		i += desc.Len()
 	}
-	return descs
+	return ret
 }
 
 type ServiceDescriptor struct {
+
 	Dt   byte   `json:"descriptor_tag"`
 	Dl   byte   `json:"descriptor_length"`
 	St   byte   `json:"service_type"`
